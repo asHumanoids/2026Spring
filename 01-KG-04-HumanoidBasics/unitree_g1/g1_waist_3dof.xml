@@ -1,0 +1,131 @@
+<mujoco model="g1_29dof">
+  <compiler angle="radian" meshdir="meshes" />
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+    <global azimuth="-130" elevation="-20"/>
+  </visual>
+
+  <default>
+    <default class="torso_motor">
+      <joint damping="0.05" armature="0.01" frictionloss="0.2"/>
+    </default>
+    <default class="leg_motor">
+      <joint damping="0.05" armature="0.01" frictionloss="0.2"/>
+    </default>
+    <default class="ankle_motor">
+      <joint damping="0.05" armature="0.01" frictionloss="0.2"/>
+    </default>
+    <default class="arm_motor">
+      <joint damping="0.05" armature="0.01" frictionloss="0.2"/>
+    </default>
+    <default class="wrist_motor">
+      <joint damping="0.05" armature="0.01" frictionloss="0.1"/>
+    </default>
+    
+  </default>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
+    <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3"
+      markrgb="0.8 0.8 0.8" width="300" height="300"/>
+    <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>
+
+    <mesh name="pelvis" file="pelvis.STL" />
+    <mesh name="pelvis_contour_link" file="pelvis_contour_link.STL" />
+    <mesh name="waist_yaw_link" file="waist_yaw_link.STL" />
+    <mesh name="waist_roll_link" file="waist_roll_link.STL" />
+    <mesh name="torso_link" file="torso_link.STL" />
+    <mesh name="logo_link" file="logo_link.STL" />
+    <mesh name="head_link" file="head_link.STL" />
+    <mesh name="waist_support_link" file="waist_support_link.STL" />
+  </asset>
+
+  <worldbody>
+    <!-- Added floor and light -->
+    <light pos="0 0 1.5" dir="0 0 -1" directional="true"/>
+    <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
+    <body name="pelvis" pos="0 0 0.81">
+      <site name="imu" size="0.01" pos="0.0 0.0 0.0" />
+      <inertial pos="0 0 -0.07605" quat="1 0 -0.000399148 0" mass="3.813"
+        diaginertia="0.010549 0.0093089 0.0079184" />
+      <!-- <joint name="floating_base_joint" type="free" limited="false" actuatorfrclimited="false" /> -->
+      <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.2 0.2 0.2 1"
+        mesh="pelvis" />
+      <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.7 0.7 0.7 1"
+        mesh="pelvis_contour_link" />
+      <geom type="mesh" rgba="0.7 0.7 0.7 1" mesh="pelvis_contour_link" />
+      <body name="waist_yaw_link">
+        <inertial pos="0.003964 0 0.018769" quat="-0.0178291 0.628464 0.0282471 0.777121"
+          mass="0.244" diaginertia="0.000158561 0.000124229 9.67669e-05" />
+        <joint name="waist_yaw_joint" pos="0 0 0" axis="0 0 1" range="-2.618 2.618"
+          actuatorfrcrange="-88 88" class="torso_motor"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.7 0.7 0.7 1"
+          mesh="waist_yaw_link" />
+        <body name="waist_roll_link" pos="-0.0039635 0 0.035">
+          <inertial pos="0 -0.000236 0.010111" quat="0.99979 0.020492 0 0" mass="0.047"
+            diaginertia="7.515e-06 6.40206e-06 3.98394e-06" />
+          <joint name="waist_roll_joint" pos="0 0 0" axis="1 0 0" range="-0.52 0.52"
+            actuatorfrcrange="-50 50" class="torso_motor"/>
+          <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.7 0.7 0.7 1"
+            mesh="waist_roll_link" />
+          <site name="secondary_imu" size="0.01" pos="-0.03959 -0.00224 0.13792"/>
+          <body name="torso_link" pos="0 0 0.019">
+            <inertial pos="0.00331658 0.000261533 0.179856"
+              quat="0.999831 0.000376204 0.0179895 -0.00377704" mass="9.598"
+              diaginertia="0.12407 0.111951 0.0325382" />
+            <joint name="waist_pitch_joint" pos="0 0 0" axis="0 1 0" range="-0.52 0.52"
+              actuatorfrcrange="-50 50" class="torso_motor"/>
+            <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.7 0.7 0.7 1"
+              mesh="torso_link" />
+            <geom type="mesh" rgba="0.7 0.7 0.7 1" mesh="torso_link" />
+            <geom pos="0.0039635 0 -0.054" quat="1 0 0 0" type="mesh" contype="0" conaffinity="0"
+              group="1" density="0" rgba="0.2 0.2 0.2 1" mesh="logo_link" />
+            <geom pos="0.0039635 0 -0.054" quat="1 0 0 0" type="mesh" rgba="0.2 0.2 0.2 1"
+              mesh="logo_link" />
+            <geom pos="0.0039635 0 -0.054" type="mesh" contype="0" conaffinity="0" group="1"
+              density="0" rgba="0.2 0.2 0.2 1" mesh="head_link" />
+            <geom pos="0.0039635 0 -0.054" type="mesh" rgba="0.2 0.2 0.2 1" mesh="head_link" />
+            <geom pos="0.0039635 0 -0.054" quat="1 0 0 0" type="mesh" contype="0" conaffinity="0"
+              group="1" density="0" rgba="0.7 0.7 0.7 1" mesh="waist_support_link" />
+            <geom pos="0.0039635 0 -0.054" quat="1 0 0 0" type="mesh" rgba="0.7 0.7 0.7 1"
+              mesh="waist_support_link" />
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <motor name="waist_yaw" joint="waist_yaw_joint" ctrlrange="-88 88" />
+    <motor name="waist_roll" joint="waist_roll_joint" ctrlrange="-50 50" />
+    <motor name="waist_pitch" joint="waist_pitch_joint" ctrlrange="-50 50" />
+  </actuator>
+
+  <sensor>
+    <jointpos name="waist_yaw_pos" joint="waist_yaw_joint" />
+    <jointpos name="waist_roll_pos" joint="waist_roll_joint" />
+    <jointpos name="waist_pitch_pos" joint="waist_pitch_joint" />
+
+    <jointvel name="waist_yaw_vel" joint="waist_yaw_joint" />
+    <jointvel name="waist_roll_vel" joint="waist_roll_joint" />
+    <jointvel name="waist_pitch_vel" joint="waist_pitch_joint" />
+
+    <jointactuatorfrc name="waist_yaw_torque" joint="waist_yaw_joint" />
+    <jointactuatorfrc name="waist_roll_torque" joint="waist_roll_joint" />
+    <jointactuatorfrc name="waist_pitch_torque" joint="waist_pitch_joint" />
+
+    <framequat name="imu_quat" objtype="site" objname="imu" />
+    <gyro name="imu_gyro" site="imu" />
+    <accelerometer name="imu_acc" site="imu" />
+
+    <framepos name="frame_pos" objtype="site" objname="imu" />
+    <framelinvel name="frame_vel" objtype="site" objname="imu" />
+
+    <framequat name="secondary_imu_quat" objtype="site" objname="secondary_imu" />
+    <gyro name="secondary_imu_gyro" site="secondary_imu" noise="5e-4" cutoff="34.9"/>
+    <accelerometer name="secondary_imu_acc" site="secondary_imu" noise="1e-2" cutoff="157"/>
+  </sensor>
+
+</mujoco>
