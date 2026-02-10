@@ -130,7 +130,7 @@ pip install mujoco mink asmagic matplotlib loop-rate-limiters
 # Open the interactive GUI viewer provided by mujoco
 python -m mujoco.viewer
 
-# Drag and drop your MuJoCo Modeling XML File into the GUI
+# Drag and drop scene.xml into the GUI
 # You will see the robot fall on the floor as the base is floating
 
 ## TODO: fixed the base so that the robot is fixed in the world frame 
@@ -141,6 +141,7 @@ python -m mujoco.viewer
 ```
 
 ### 3. Interact with asRoBallet via asMagic App
+0. comment/remove the <freejoint/> of the base.
 1. Connect your iPhone to the same local Wi-Fi, just like your PC.
 2. Install asMagic on your iPhone. Open the app and click the Data Streaming icon under Tools. You will see the IP of your iPhone.
 3. Run the Jupyter notebook teleop_asRoBallet_mujoco_asmagic.ipynb

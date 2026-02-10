@@ -20,10 +20,10 @@
         </default>
     </default>
 
-    <!-- <contact>
+    <contact>
         <pair name="ball_floor" geom1="ball_geom" geom2="floor" condim="6" friction="1.0 1 0.01"
             solimp="0.85 0.99 0.006" />
-    </contact> -->
+    </contact>
 
     <asset>
         <mesh name="base_link" file="meshes/base_link.stl" scale="0.001 0.001 0.001" />
@@ -48,25 +48,15 @@
         <mesh name="neck_link" file="meshes/neck_link.stl" scale="0.001 0.001 0.001" />
         <mesh name="head_link" file="meshes/head_link.stl" scale="0.001 0.001 0.001" />
         <mesh name="ball_link" file="meshes/ball_link.stl" scale="0.001 0.001 0.001" />
-
-        <!-- <texture name="grid" type="2d" builtin="checker" width="512" height="512"
-            rgb1="0.8 0.8 0.8" rgb2="0.05 0.6 1" /> -->
         <texture name="grid_ball" type="2d" builtin="checker" width="512" height="512" rgb1="1 0 0"
             rgb2="0 1 0" />
-        
-        <!-- <material name="floor_mat" shininess="1" specular="1" texture="grid" texrepeat="20 20" /> -->
         <material name="ball_mat" texture="grid_ball" rgba="1 0 0 1" />
         <material name="body_mat" rgba="0.5 0.5 0.5 1" />
     </asset>
 
-    <worldbody>
-        <!-- <light directional="true" pos="-0.5 0.5 3" dir="0 0 -1" /> -->
-        <!-- <geom name="floor" type="plane" pos="0 0 -0.12" size="5 5 0.1" material="floor_mat"
-            rgba="1 1 1 1" contype="7" conaffinity="7" /> -->
-        
+    <worldbody>    
         <body name="base_link" pos="0.0 0.0 0.0" euler="0.0 -0.0 0.0">
-            <!-- <joint name="floating_base_joint" type="free" /> -->
-            <!-- <freejoint /> -->
+            <freejoint />
             <geom class="visual" name="base_geom" type="mesh" mesh="base_link" pos="0 0 0" euler="0 0 0" />
             <inertial mass="4.8833491952093615"
                 pos="0.002877142611364894 0.0004304927756562858 0.26369851292018004"
@@ -125,7 +115,7 @@
                                 <inertial mass="0.1558676529430366"
                                     pos="1.895082812576374e-05 -0.16594223580246156 -0.00021726971288407525"
                                     fullinertia="0.0017964862899183462 6.465951882236173e-05 0.0017825833478305741 -5.828593428573483e-07 -1.341909303522208e-09 6.551929599814123e-06" />
-                                <site name="left_wrist" pos="0 -0.30 0" />
+                                <site name="left_wrist" pos="0 -0.30 0" euler="-1.5707 0 3.1415"/>
                             </body>
                         </body>
                     </body>
@@ -176,7 +166,7 @@
                                 <inertial mass="0.15586791529929014"
                                     pos="-5.626475324908146e-05 -0.16594235540000968 -0.00021726961129907342"
                                     fullinertia="0.001796485962998362 6.46591441813976e-05 0.0017825826442405615 2.3653024226103953e-07 1.2047957958458172e-09 6.5519346690109845e-06" />
-                                <site name="right_wrist" pos="0 -0.30 0" />
+                                <site name="right_wrist" pos="0 -0.30 0" euler="1.5707 0 0"/>
                             </body>
                         </body>
                     </body>
@@ -606,35 +596,23 @@
             <!-- add imu site -->
             <site name="imu_site" pos="0 0 0.24" size="0.01" />
             <site name="ball_site" pos="0 0 0" size="0.01" />
-            <body name="ball_link"
-                pos="4.539775579063084e-17 3.9330107106101477e-16 8.699999999969066e-05"
-                euler="-1.0148989447430099e-16 -4.996003610813201e-16 1.4198673232204494e-77">
-                <joint name="ball_joint" type="ball" pos=" 0.0  0.0  0" damping="0.01" />
-                <geom name="ball_geom" type="mesh" mesh="ball_link" pos="0 0 0" euler="0 0 0" />
-                <inertial mass="3.021143163744471"
-                    pos="2.885352467797298e-17 2.885352467797308e-17 2.886579864025402e-17"
-                    fullinertia="0.024537068316026582 0.024537068316026783 0.024537068316026575 1.2502313135099962e-16 2.33620219102254e-17 -1.3441326783345871e-17" />
-            </body>
-            <camera name="robot_cam" pos="-2.8 0 0.8" euler="0 -1.57 -1.57" />
         </body>
-        <!-- <body name="ball_link"
+        <body name="ball_link"
             pos="4.539775579063084e-17 3.9330107106101477e-16 8.699999999969066e-05"
             euler="-1.0148989447430099e-16 -4.996003610813201e-16 1.4198673232204494e-77">
             <joint type="free" damping="0.1"/>
-            <geom name="ball_geom" type="mesh" mesh="ball_link" pos="0 0 0" euler="0 0 0" />
+            <geom class="rubber" name="ball_geom" type="mesh" mesh="ball_link" pos="0 0 0" euler="0 0 0" />
             <inertial mass="3.021143163744471"
                 pos="2.885352467797298e-17 2.885352467797308e-17 2.886579864025402e-17"
                 fullinertia="0.024537068316026582 0.024537068316026783 0.024537068316026575 1.2502313135099962e-16 2.33620219102254e-17 -1.3441326783345871e-17" />
-        </body> -->
-
-        <!-- <camera name="robot_cam" pos="-1 0 1" euler="0 -1.57 -1.57"/> -->
+        </body>
     </worldbody>
 
     <actuator>
         <motor name="wheel_1" joint="wheel_base_1_joint" gear="3" forcerange="-17 17" />
         <motor name="wheel_2" joint="wheel_base_2_joint" gear="3" forcerange="-17 17" />
         <motor name="wheel_3" joint="wheel_base_3_joint" gear="3" forcerange="-17 17" />
-<!-- 
+
         <position class="torso" name="neck" joint="neck_joint" ctrlrange="-3.14 3.14"
             forcerange="-17 17" />
         <position class="torso" name="head" joint="head_joint" ctrlrange="-0.2 0.5"
@@ -656,7 +634,7 @@
         <position class="torso" name="left_shoulder_yaw" joint="left_shoulder_yaw_joint"
             ctrlrange="-3.14 3.14" forcerange="-17 17" />
         <position class="torso" name="left_elbow" joint="left_elbow_joint" ctrlrange="-2.1 2.1"
-            forcerange="-17 17" /> -->
+            forcerange="-17 17" />
     </actuator>
 
     <sensor>
