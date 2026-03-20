@@ -5,3 +5,5 @@
 ## Kinematics & Geometry (KG)
 
 ## Dynamics and Control (DC)
+
+## Foundation Models (FM)

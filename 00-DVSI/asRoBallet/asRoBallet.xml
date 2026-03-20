@@ -56,7 +56,7 @@
 
     <worldbody>    
         <body name="base_link" pos="0.0 0.0 0.0" euler="0.0 -0.0 0.0">
-            <freejoint />
+            <!-- <freejoint /> -->
             <geom class="visual" name="base_geom" type="mesh" mesh="base_link" pos="0 0 0" euler="0 0 0" />
             <inertial mass="4.8833491952093615"
                 pos="0.002877142611364894 0.0004304927756562858 0.26369851292018004"
