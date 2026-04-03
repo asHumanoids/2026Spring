@@ -91,7 +91,7 @@ cmake .. && make
 ```bash
 # run unitree_mujoco
 # In terminal 1: launch mujoco simulation
-# Set the robot at /simulate/config.yaml to g1
+# Set the robot at /simulate_python/config.yaml to g1
 # Set domain_id to 0
 # Set enable_elastic_hand to 1
 # Set use_joystck to 1
@@ -103,6 +103,7 @@ python unitree_mujoco.py
 # so files are in the /home/fang/Documents/unitree/unitree_sdk2/thirdparty/lib/x86_64
 # add path to 
 # Edit config file to specify the policy path in /home/as/Documents/unitree/unitree_rl_lab/deploy/robots/g1_23dof/config/config.yaml
+conda activate env_isaaclab
 cd unitree_rl_lab/deploy/robots/g1_23dof/build
 ./g1_ctrl -n lo
 # 1. press [L2 + Up] to set the robot to stand up

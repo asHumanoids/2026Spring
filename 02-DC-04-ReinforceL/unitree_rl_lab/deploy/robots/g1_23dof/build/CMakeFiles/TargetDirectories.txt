@@ -1,0 +1,4 @@
+/home/as/Documents/unitree/unitree_rl_lab/deploy/robots/g1_23dof/build/CMakeFiles/g1_29dof_controller_lib.dir
+/home/as/Documents/unitree/unitree_rl_lab/deploy/robots/g1_23dof/build/CMakeFiles/g1_ctrl.dir
+/home/as/Documents/unitree/unitree_rl_lab/deploy/robots/g1_23dof/build/CMakeFiles/edit_cache.dir
+/home/as/Documents/unitree/unitree_rl_lab/deploy/robots/g1_23dof/build/CMakeFiles/rebuild_cache.dir

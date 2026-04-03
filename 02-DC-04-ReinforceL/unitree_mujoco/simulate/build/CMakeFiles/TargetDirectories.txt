@@ -1,0 +1,4 @@
+/home/as/Documents/unitree/unitree_mujoco/simulate/build/CMakeFiles/unitree_mujoco.dir
+/home/as/Documents/unitree/unitree_mujoco/simulate/build/CMakeFiles/jstest.dir
+/home/as/Documents/unitree/unitree_mujoco/simulate/build/CMakeFiles/edit_cache.dir
+/home/as/Documents/unitree/unitree_mujoco/simulate/build/CMakeFiles/rebuild_cache.dir
