@@ -37,32 +37,7 @@ In this folder, **GR00T** is used as the practical example of robotics foundatio
 ```bash
 git clone --recurse-submodules https://github.com/NVIDIA/Isaac-GR00T
 cd Isaac-GR00T
-```
-
-If installing on PC with Nvidia 5090, add the following in pyproject.toml
-```text
-"flash-attn==2.8.0.post2",
-
-# PyTorch CUDA 12.8 index for RTX 5090 (Blackwell/sm_120) support
-[[tool.uv.index]]
-name = "pypi"
-url = "https://pypi.python.org/simple"
-
-[[tool.uv.index]]
-name = "pytorch-cu128"
-url = "https://download.pytorch.org/whl/cu128"
-explicit = true
-
-[tool.uv.sources]
-torch = { index = "pytorch-cu128" }
-torchvision = { index = "pytorch-cu128" }
-
-[tool.uv.extra-build-dependencies]
-flash-attn = [{ requirement = "torch", match-runtime = true }]
-```
-
-```bash
-uv sync --python 3.10
+uv sync
 uv pip install -e .
 ```
 
@@ -76,6 +51,7 @@ sudo apt-get install git-lfs
 bash gr00t/eval/sim/GR00T-WholeBodyControl/setup_GR00T_WholeBodyControl.sh
 
 # Terminal 1 for server
+# Use model from https://github.com/NVIDIA/Isaac-GR00T/issues/574#issuecomment-4082084479
 uv run python gr00t/eval/run_gr00t_server.py \
     --model-path nvidia/GR00T-N1.6-G1-PnPAppleToPlate \
     --embodiment-tag UNITREE_G1 \
