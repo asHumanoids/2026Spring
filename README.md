@@ -1,12 +1,22 @@
-# 2026Spring
+# 2026Spring: A Crash Course on Humanoid Robots
 
-*Notes*: Humanoid Robotics remains a new field of research to me and my research group. My sincere apologies if any of the contents covered here may appear to be different from the way you approach this subject. Nevertheless, both me and my team are trying our best to go through the literature and assmeble the state-of-the-art practice in this field and present it to you. Feel free to contact me for any feedback or discussion. All is welcome. We are also learning while teaching.
+*Notes*: Humanoid Robotics remains a new field of research to me and my research group. My sincere apologies if any of the contents covered here may appear to be different from the way you approach this subject. Nevertheless, both me and my team are trying our best to go through the literature and assmeble the state-of-the-art practice in this field and present it to you. Feel free to contact me for any feedback or discussion. All is welcome. We are also learning while teaching. *The first half semester of this course was delivered by Prof. Yoshihiro Nakamura at MBZUAI*.
 
-The closest research in my lab to some of the key technologies also used in humanoids are listed at the end of the page for your reference. *The asMagic app is used for asRoBallet, asOverDog, and asMagiClaw as the unified perceptual system and interaction interface. You can find a 3D preview of all robots in the asMagic app.*
+- **Instructor**: 
+    - Prof. Chaoyang Song (Chaoyang.Song@mbzuai.ac.ae)
+- **Teaching Assistants**: 
+    - Haoran Sun (Haoran.Sun@mbzuai.ac.ae)
+    - Zishang Zhang (Zishang.Zhang@mbzuai.ac.ae)
+    - Guangyi Huang (Guangyi.Huang@mbzuai.ac.ae)
+- **Acknowledgement**: 
+    - Prof. Fang Wan (wanf@sustech.edu.cn)
+    - Tianyu Wu
 
-## Week 00 6-Week Course Outline for Advanced Humanoids
+**Refer to the end of the page**: The closest research in my lab can be related to some of the key technologies also used in humanoids, which are listed at the end of the page for your reference. *The asMagic app is used for asRoBallet, asOverDog, and asMagiClaw as the unified perceptual system and interaction interface. You can find a 3D preview of these robots in the asMagic app.*
 
-This 6-week module aims to provide you with a hands-on practice of humanoid robots in modern simulators, supported by a series of literature review of recent development in this emerging field. There are three classes each week, one assignment, and one final project.
+## Course Outline
+
+This course aims to provide you with a hands-on practice of humanoid robots in modern simulators, supported by a series of literature review of recent development in this emerging field, scheduled with three classes each week, one assignment, and one final project.
 
 Core literatures related to this course are as the following:
 - Humanoid Locomotion and Manipulation: Current Progress and Challenges in Control, Planning, and Learning by Zhaoyuan Gu, Junheng Li, Wenlan Shen, Wenhao Yu, Zhaoming Xie, Stephen McCrory, Xianyi Cheng, Abdulaziz Shamsah, Robert Griffin, C. Karen Liu, Abderrahmane Kheddar, Xue Bin Peng, Yuke Zhu, Guanya Shi, Quan Nguyen, Gordon Cheng, Huijun Gao, Ye Zhao
@@ -28,65 +38,144 @@ Core literatures related to this course are as the following:
 - Unitree RL Lab by Unitree Robotics
     - https://github.com/unitreerobotics/unitree_rl_lab 
 
-## Week 01 The Need for Robot Description
+## Module 01: Robot Description Basics
 
-### Class 01 on Mar 02 (Mon): 
+### Class 01 on Mar 02 (Mon): Perspectives in Understanding Robots
 
-### Class 02 on Mar 04 (Wed): 
+### Class 02 on Mar 04 (Wed): The Need for Robot Description
 
-### Class 03 on Mar 06 (Fri): 
+### Class 03 on Mar 06 (Fri): MuJoCo for Robots
 
-## Week 02 Physics Simulation for Robots
+## Module 02 Simulation & Interaction with Humanoids
 
-### Class 04 on Mar 23 (Mon): 
+### Class 04 on Mar 23 (Mon): [Tutorial 1 on Simulation Basics](https://github.com/asHumanoids/2026Spring/tree/main/00-DVSI)
 
-### Class 05 on Mar 25 (Wed): 
+### Class 05 on Mar 25 (Wed): [Tutorial 2 on Humanoid Retargeted](https://github.com/asHumanoids/2026Spring/tree/main/01-KG-03-MovRetarget)
 
-### Class 06 on Mar 27 (Fri): 
+### Class 06 on Mar 27 (Fri): [Tutorial 3 on Humanoid Simulated](https://github.com/asHumanoids/2026Spring/tree/main/01-KG-04-HumanoidBasics)
 
-## Week 03 Basic Simulation & Interaction with Humanoids
+### Class 07 on Mar 30 (Mon): [Tutorial 4 on Humanoid Walking](https://github.com/asHumanoids/2026Spring/tree/main/01-KG-05-HumanoidAdvanced)
 
-### Class 07 on Mar 30 (Mon): 
+### Class 08 on Apr 01 (Wed): [Tutorial 5 on Humanoid Whole-Body Control](https://github.com/asHumanoids/2026Spring/tree/main/02-DC-03-WholeBody)
 
-### Class 08 on Apr 01 (Wed): 
+### Class 09 on Apr 03 (Fri): [Tutorial 6 on Humanoid Reinforcement Learning](https://github.com/asHumanoids/2026Spring/tree/main/02-DC-04-ReinforceL)
 
-### Class 09 on Apr 03 (Fri): 
+### Class 10 on Apr 06 (Mon): [Tutorial 7 on Humanoid Foundation Models](https://github.com/asHumanoids/2026Spring/tree/main/03-FM-01-VLA)
 
-## Week 04 Advanced Simulation & Interaction with Humanoids
+## Module 03 Selected Topics on Humanoid Robotics
 
-### Class 10 on Apr 06 (Mon): 
+### Class 11 on Apr 08 (Wed): Humanoid Movement
 
-### Class 11 on Apr 08 (Wed): 
+### Class 12 on Apr 10 (Fri): Humanoid Contact
 
-### Class 12 on Apr 10 (Fri): 
+### Class 13 on Apr 13 (Mon): Humanoid Control
 
-## Week 05 Selected Topics in Humanoid Robotics
+### Class 14 on Apr 15 (Wed): Humanoid Learning
 
-### Class 13 on Apr 13 (Mon): 
+## Module 04 Final Project on Humanoid Robots
 
-### Class 14 on Apr 15 (Wed): 
+### *Apr 17 (Mon): Deadline of Submission for Assignment*
 
-### Class 15 on Apr 17 (Fri): 
+### Class 15 on Apr 17 (Fri): Final Project Preparation
 
-## Week 06 Preparation & Presentation of Final Project
+### Class 16 on Apr 20 (Mon): Final Project Preparation
 
-### Class 16 on Apr 20 (Mon): 
+### Class 17 on Apr 22 (Wed): Final Project Preparation
 
-### Class 17 on Apr 22 (Wed): 
+### Class 18 on Apr 24 (Fri): Final Presentation
 
-### Class 18 on Apr 24 (Fri): 
+### *Apr 27 (Mon): Deadline of Submission for Final Report*
 
+## Assignment: 
 
+This is an individual assignment:
 
+1. Reproduce PyRoKi on your own to achieve inverse kinematics for any humanoid robot of your choice. 
 
+2. Record a video in mp4 demonstration to show case your results. 
 
-## Description Visualization Simulation & Interaction (DVSI)
+3. Pack all code in a zip and submit the zip file and mp4 before April 17, Friday noon.
+    - Include a Markdown with step-by-step instructions to run your code
+    - Just like in paper submission, if your submitted code can not work by the reviewers, it is likely that your paper will be rejected without the chance of rebuttal. So, make sure your code is clean and your markdown is clear
+    - Record a short video running your code on your computer showing successful completion of this assignment as a supplementary material
 
-## Kinematics & Geometry (KG)
+### Deadline of submission: April 17, Friday noon
 
-## Dynamics and Control (DC)
+- Email Title: [ROB803] StudentID - FirstName LastName - Assignment
+    - To: chaoyang.song@mbzuai.ac.ae 
+    - Cc: haoran.sun@mbzuai.ac.ae; zishang.zhang@mbzuai.ac.ae; guangyi.huang@mbzuai.ac.ae
+    - Zip Filename Example (same as Email Title): [ROB803] 12345678 - Jan Doe - Assignment.zip
+    - Folder Structure When Unzipped:
+        <pre>
+        [ROB803] 12345678 - Jan Doe - Assignment
+        ├── 12345678 - Jan Doe - Assignment.md
+        ├── 12345678 - Jan Doe - Assignment.pdf
+        ├── 12345678 - Jan Doe - Assignment.mp4
+        ├── 12345678 - Jan Doe - Assignment - SourceCode
+            ├── ...
+            └── ...
+        </pre>
 
-## Foundation Models (FM)
+## Final Project: 
+
+This is an individual project:
+
+1. Record videos of a socially positive gesture from your cultural background with yourselves as the model (mask your face if you are not comfortable showing): you will need to explain the positive social meaning of this gesture, explain your data recording protocol with reproducible instructions, and the specific data that you’ve recorded, which should be accessible to the class openly. 
+
+2. Capture your whole body gesture movement in a file format suitable for your chosen method of retargeting: you will need to explain the file format chosen, what algorithm you’ve chosen to extract your body movement from your recorded video, record videos of your extracted body movement, and briefly evaluate your extracted body movement data with quantifiable metrics.
+
+3. Perform whole body retargeting on a humanoid robot of your choice using any algorithm of your choice: using your extracted movement data to perform whole body retargeting on a humanoid, record videos of the retargeting results, and briefly evaluate the retargeting results (preferrable compare with your original recording by yourself). 
+
+### Deadline of Final Report Submission: Apr 27, Monday noon
+
+1. **Submit a final report before Apr 27 noon**: this will be used to replace the original final exam (19%) in the syllabus
+    - Each student needs to submit a report of no more than 4 pages long (excluding references) using the format of ICRA to document their final project, with a tentative to-do list toward potential deployment on a humanoid hardware. It should contain the following content:
+        - provide a descriptive content with literature reference to justify the problem,
+        - mathematically formulate the problem and any related derivation,
+        - include pseudo-code explaining your solution pipeline 
+        - explain the data you have collected, and
+        - include analysis of your final results obtained.
+
+    - **Email Title: [ROB803] StudentID - FirstName LastName - FinalReport**
+        - To: chaoyang.song@mbzuai.ac.ae 
+        - Cc: haoran.sun@mbzuai.ac.ae; zishang.zhang@mbzuai.ac.ae; guangyi.huang@mbzuai.ac.ae
+        - Zip Filename Example (same as Email Title): [ROB803] 12345678 - Jan Doe - FinalReport.zip
+        - Folder Structure When Unzipped:
+        <pre>
+        [ROB803] 12345678 - Jan Doe - FinalReport
+        ├── 12345678 - Jan Doe - FinalReport.pdf
+        ├── 12345678 - Jan Doe - FinalReport - LatexSourceCode
+            ├── MainDocument.tex
+            ├── Reference.bib
+            └── figs
+                ├── fig1.png
+                ├── fig1.png
+                └── ...
+        └── 12345678 - Jan Doe - FinalReport - SupplementaryVideo
+            ├── Vid1.mp4
+            ├── Vid2.mp4
+            └── ...
+        </pre>
+
+### Date of Online Final Presentation: Apr 24, Friday in-class
+
+2. **Conduct an interactive final presentation on Apr 24 in-class**: this will be used to replace the original final project (30%) in the syllabus
+    - Each student will need to conduct a 5-min in-class presentation of your final project.
+        - Following the university recommendation, you are required to present it online, live, and interactive. You must turn on your camera. You must show interaction during the class.
+        - You are encouraged to prepare a 5-min presentation recording in advance (only as a backup) and upload before Apr 23 noon.
+        - Be sure to test your audio and screensharing and finish your online presentation within 5 min. 
+
+    - **Email Title: [ROB803] StudentID - FirstName LastName - FinalPresentation**
+        - To: chaoyang.song@mbzuai.ac.ae 
+        - Cc: haoran.sun@mbzuai.ac.ae; zishang.zhang@mbzuai.ac.ae; guangyi.huang@mbzuai.ac.ae
+        - Zip Filename Example (same as Email Title): [ROB] 12345678 - Jan Doe - FinalPresentation.zip
+        - Folder Structure When Unzipped:
+        <pre>
+        [ROB803] 12345678 - Jan Doe - FinalPresentation
+        ├── 12345678 - Jan Doe - FinalPresentation.pdf
+        ├── 12345678 - Jan Doe - FinalPresentation.pptx
+        └── 12345678 - Jan Doe - FinalPresentation.mp4
+        </pre>
 
 ## Selected Research in the Design & Learning Research Group (Remotely) Related to Humanoid Robotics
 
