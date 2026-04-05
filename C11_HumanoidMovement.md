@@ -47,11 +47,15 @@ To integrate motion or compute geometric errors, we map elements between the lin
 - Logarithmic Map ($log$): The inverse unwrapping operation.
 
 To manipulate local tangent perturbations, we define the right-plus $\oplus$ and right-minus $\ominus$ operators:
-$$\mathcal{Y} = \mathcal{X} \oplus ^{\mathcal{X}}\tau \triangleq \mathcal{X} \circ Exp(^{\mathcal{X}}\tau) \in \mathcal{M}$$
+$$
+\mathcal{Y} = \mathcal{X} \oplus ^{\mathcal{X}}\tau \triangleq \mathcal{X} \circ Exp(^{\mathcal{X}}\tau) \in \mathcal{M}
+$$
 
 **Uncertainty Modeling**: State uncertainty is defined rigorously on the tangent space using the expectation operator:
 
-$$\Sigma_{\mathcal{X}} \triangleq \mathbb{E}[(\mathcal{X} \ominus \overline{\mathcal{X}})(\mathcal{X} \ominus \overline{\mathcal{X}})^{\top}]$$
+$$
+\Sigma_{\mathcal{X}} \triangleq \mathbb{E}[(\mathcal{X} \ominus \overline{\mathcal{X}})(\mathcal{X} \ominus \overline{\mathcal{X}})^{\top}]
+$$
 
 This allows us to construct mathematically sound Gaussian variables on manifolds, preventing the singularities (like gimbal lock) associated with Euler angles.
 
@@ -70,11 +74,15 @@ Advanced toolkits like PyRoki separate optimization variables (e.g., joint confi
 
 - Joint Pose Cost: Penalizes the deviation between the current and target base poses. Using the Lie group logarithm ensures geometric fidelity:
 
-$$\hat{c}_{pose}(q, T_{base\_target}) = log(T_{base\_target}^{-1}T_{base\_i})$$
+$$
+\hat{c}_{pose}(q, T_{base\_target}) = log(T_{base\_target}^{-1}T_{base\_i})
+$$
 
 - Manipulability Cost: Maximizes Yoshikawa's manipulability measure to keep the robot away from singularities, utilizing the manipulator Jacobian $J_{i}(q)$:
 
-$$\hat{c}_{manip}(q, i) = (\sqrt{det(J_{i}(q)J_{i}(q)^{T})} + \epsilon)^{-1}$$
+$$
+\hat{c}_{manip}(q, i) = (\sqrt{det(J_{i}(q)J_{i}(q)^{T})} + \epsilon)^{-1}
+$$
 
 - Collision Avoidance: Signed distances $d$ between collision geometries (e.g., capsules/spheres) are computed and converted into costs. A smooth activation function avoids discontinuities at $d=0$:
 
@@ -118,7 +126,9 @@ To resolve the embodiment gap introduced in Part 1, we apply the GMR methodology
 
 Most retargeting artifacts are introduced during the scaling of the source motion. GMR calculates a general scaling factor based on human height, which adjusts a custom local scale factor $s_{b}$ defined for each key body (e.g., distinguishing upper and lower body proportions). The target body position in Cartesian space is:
 
-$$p_{b}^{target} = \frac{h}{h_{ref}}s_{b}(p_{j}^{source} - p_{root}^{source}) + \frac{h}{h_{ref}}s_{root}p_{root}^{source}$$
+$$
+p_{b}^{target} = \frac{h}{h_{ref}}s_{b}(p_{j}^{source} - p_{root}^{source}) + \frac{h}{h_{ref}}s_{root}p_{root}^{source}
+$$
 
 ### 5.2 Two-Stage Differential IK Optimization
 
