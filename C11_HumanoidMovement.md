@@ -75,7 +75,7 @@ Advanced toolkits like PyRoki separate optimization variables (e.g., joint confi
 - Joint Pose Cost: Penalizes the deviation between the current and target base poses. Using the Lie group logarithm ensures geometric fidelity:
 
 $$
-\hat{c}_{pose}(q, T_{base\_target}) = log(T_{base\_target}^{-1}T_{base\_i})
+\hat{c}_{\text{pose}}(\mathbf{q}, \mathbf{T}_{\text{base\_target}}) = \log\left( \mathbf{T}_{\text{base\_target}}^{-1} \mathbf{T}_{\text{base\_i}}(\mathbf{q}) \right)
 $$
 
 - Manipulability Cost: Maximizes Yoshikawa's manipulability measure to keep the robot away from singularities, utilizing the manipulator Jacobian $J_{i}(q)$:
