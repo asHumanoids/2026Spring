@@ -78,7 +78,9 @@ $$\hat{c}_{manip}(q, i) = (\sqrt{det(J_{i}(q)J_{i}(q)^{T})} + \epsilon)^{-1}$$
 
 - Collision Avoidance: Signed distances $d$ between collision geometries (e.g., capsules/spheres) are computed and converted into costs. A smooth activation function avoids discontinuities at $d=0$:
 
-$$d_{c} = \begin{cases}-d+0.5\eta & if~d<0 \\ \frac{0.5}{\eta}(-d+\eta)^{2} & if~0<d<\eta \\ 0 & otherwise \end{cases}$$
+$$d_{c} = \begin{cases} -d+0.5\eta & if~d<0 \\ 
+\frac{0.5}{\eta}(-d+\eta)^{2} & if~0<d<\eta \\ 
+0 & otherwise \end{cases} $$
 
 ### 3.3 Numerical Solvers
 
