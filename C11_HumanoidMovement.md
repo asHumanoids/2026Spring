@@ -47,6 +47,7 @@ To integrate motion or compute geometric errors, we map elements between the lin
 - Logarithmic Map ($log$): The inverse unwrapping operation.
 
 To manipulate local tangent perturbations, we define the right-plus $\oplus$ and right-minus $\ominus$ operators:
+
 $$
 \mathcal{Y} = \mathcal{X} \oplus ^{\mathcal{X}}\tau \triangleq \mathcal{X} \circ Exp(^{\mathcal{X}}\tau) \in \mathcal{M}
 $$
@@ -74,23 +75,15 @@ Advanced toolkits like PyRoki separate optimization variables (e.g., joint confi
 
 - Joint Pose Cost: Penalizes the deviation between the current and target base poses. Using the Lie group logarithm ensures geometric fidelity:
 
-$$
-\hat{c}_{pose}(q, T_{base\_target}) = log(T_{base\_target}^{-1}T_{base\_i})
-$$
-
 ```math
-\hat{c}_{\text{pose}}(\mathbf{q}, \mathbf{T}_{\text{base\_target}}) = \log\left( \mathbf{T}_{\text{base\_target}}^{-1} \mathbf{T}_{\text{base\_i}}(\mathbf{q}) \right)
+c_{pose}(\mathbf{q}, \mathbf{T}_{target}) = \frac{1}{2} \left\| \log\left(\mathbf{T}_{target}^{-1} \mathbf{T}_{i}(\mathbf{q})\right)^\vee \right\|_{\mathbf{W}}^2
 ```
-
-$$
-\hat{c}_{\text{pose}}(\mathbf{q}, \mathbf{T}_{\text{base\_target}}) = \log\left( \mathbf{T}_{\text{base\_target}}^{-1} \mathbf{T}_{\text{base\_i}}(\mathbf{q}) \right)
-$$
 
 - Manipulability Cost: Maximizes Yoshikawa's manipulability measure to keep the robot away from singularities, utilizing the manipulator Jacobian $J_{i}(q)$:
 
-$$
-\hat{c}_{manip}(q, i) = (\sqrt{det(J_{i}(q)J_{i}(q)^{T})} + \epsilon)^{-1}
-$$
+```math
+c_{manip}(\mathbf{q}, i) = \left( \sqrt{\det\left(\mathbf{J}_{i}(\mathbf{q})\mathbf{J}_{i}(\mathbf{q})^{\top}\right)} + \epsilon \right)^{-1}
+```
 
 - Collision Avoidance: Signed distances $d$ between collision geometries (e.g., capsules/spheres) are computed and converted into costs. A smooth activation function avoids discontinuities at $d=0$:
 
@@ -134,9 +127,9 @@ To resolve the embodiment gap introduced in Part 1, we apply the GMR methodology
 
 Most retargeting artifacts are introduced during the scaling of the source motion. GMR calculates a general scaling factor based on human height, which adjusts a custom local scale factor $s_{b}$ defined for each key body (e.g., distinguishing upper and lower body proportions). The target body position in Cartesian space is:
 
-$$
-p_{b}^{target} = \frac{h}{h_{ref}}s_{b}(p_{j}^{source} - p_{root}^{source}) + \frac{h}{h_{ref}}s_{root}p_{root}^{source}
-$$
+```math
+\mathbf{p}_{b}^{target} = \frac{h}{h_{ref}} s_{b} (\mathbf{p}_{j}^{source} - \mathbf{p}_{root}^{source}) + \frac{h}{h_{ref}} s_{root} \mathbf{p}_{root}^{source}
+```
 
 ### 5.2 Two-Stage Differential IK Optimization
 
