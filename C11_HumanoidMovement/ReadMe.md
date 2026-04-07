@@ -12,7 +12,7 @@ When driving humanoid motion, whether through offline datasets or real-time spat
 
     Even if a robot is designed to mimic human proportions, it is **almost never** an exact match. Humanoid robots have fixed mechanical link lengths $\mathbf{L}_{robot}$ that differ from the bone lengths $\mathbf{L}_{human}$ of any given human subject.
 
-    ![alt text](image.png)
+    ![alt text](images/image.png)
     
     Mathematically, the Cartesian position of an end-effector (like a foot or hand) is a function of both joint angles and link lengths: $\mathbf{x} = f(\mathbf{q}, \mathbf{L})$. Because $\mathbf{L}_{robot} \neq \mathbf{L}_{human}$, applying the same angles $\mathbf{q}_{human}$ results in a different spatial position:
     
@@ -20,30 +20,15 @@ When driving humanoid motion, whether through offline datasets or real-time spat
     f(\mathbf{q}_{human}, \mathbf{L}_{robot}) \neq f(\mathbf{q}_{human}, \mathbf{L}_{human})
     ```
 
-<table>
-  <tr>
-    <td>
-
 2. **Geometric Artifacts: Foot Sliding and Ground Penetration**
 
-
     The most visible failure of direct mapping occurs at the contact points.
-    
 
     - **Ground Penetration**: If the human's thigh-to-calf ratio is larger than the robot's, a human "squat" angle might command the robot's feet to a position below the floor level.
 
     - **Foot Sliding**: Because the robot's legs are a different length, the distance the foot travels during a stride will not match the human's stride length. If the robot's global root (pelvis) moves at the human's velocity but its legs are shorter, the feet will appear to "skate" or slide across the floor to keep up, breaking the physical requirement of static friction during the stance phase.
 
-    </td>
-    <td>
-      <img src="image-4.png" alt="example" width="500">
-    </td>
-  </tr>
-</table>
-
-<table>
-  <tr>
-    <td>
+    ![alt text](images/image-4.png)
 
 3. **Self-Collision and Workspace Incompatibility**
 
@@ -53,33 +38,19 @@ When driving humanoid motion, whether through offline datasets or real-time spat
 
     - **Self-Penetration**: Human limbs are soft and compliant. Robotic limbs are often bulky, rigid housings for motors and electronics. A human pose where the hands are close to the chest might be perfectly safe for a person, but if those same angles are mapped to a robot with thick forearms and a protruding torso, the robot's arms will collide with its own chassis.
 
-    </td>
-    <td>
-      <img src="image-3.png" alt="example" width="500">
-    </td>
-  </tr>
-</table>
-
-<table>
-  <tr>
-    <td>
+    ![alt text](images/image-3.png)
 
 4. **Dynamic Instability**
 
     Direct mapping ignores the mass distribution and Center of Mass (CoM) of the robot. A human can maintain balance in a specific pose because their CoM is positioned over their support polygon. Because a robot has a different mass distribution (e.g., heavy motors in the hips or a battery in the torso), copying the human's joint angles will shift the robot's CoM to a different relative location, often causing the robot to tip over.
 
-    </td>
-    <td>
-      <img src="image-5.png" alt="example" width="1000">
-    </td>
-  </tr>
-</table>
+    ![alt text](images/image-5.png)
 
 **The Latest Solution: Optimization-Based Retargeting**
 
 Because direct mapping fails, researchers use Inverse Kinematics (IK) or General Motion Retargeting (GMR). Instead of copying angles, these systems treat the human data as "spatial suggestions." They define target positions for key body parts (the "key bodies") and then solve an optimization problem to find the specific $\mathbf{q}_{robot}$ that places the robot's hands and feet as close as possible to the human's targets while strictly enforcing the robot's joint limits, self-collision boundaries, and balance constraints.
 
-![alt text](image-6.png)
+    ![alt text](images/image-6.png)
 
 ### 1.2 Contextualizing the Pipeline
 
@@ -101,28 +72,15 @@ Humanoid movement does not occur in simple Euclidean space; it involves complex 
 - **Improve Optimization**: Allowing SLAM and IK solvers to operate on the "natural" geometry of 3D space.
 - **Maintain Validity**: Ensuring that robot states always correspond to physically possible configurations.
 
-![alt text](image-2.png)
-
-<table>
-  <tr>
-    <td>
+    ![alt text](images/image-2.png)
 
 1. **Avoiding Topological Singularities ([Gimbal Lock](https://en.wikipedia.org/wiki/Gimbal_lock))**
 
     Most intuitive representations of rotation, such as Euler angles (roll, pitch, yaw), suffer from "singularities." When certain orientations are reached, the mapping between the representation and the actual physical rotation becomes non-unique, and the system loses a degree of freedom. This is known as **Gimbal Lock**.
 
     Lie groups treat rotations as elements on a smooth, continuous surface called a **manifold**. Because this representation is global and geometrically consistent, it never encounters these mathematical "dead zones," ensuring that control and estimation algorithms remain stable regardless of the robot's orientation.
-
-    </td>
-    <td>
-      <img src="Gimbal_Lock_Plane.gif" alt="example" width="500">
-    </td>
-  </tr>
-</table>
-
-<table>
-  <tr>
-    <td>
+    
+    ![alt text](images/Gimbal_Lock_Plane.gif)
 
 2. **Principled Calculus: Integration and Differentiation**
 
@@ -141,16 +99,7 @@ Humanoid movement does not occur in simple Euclidean space; it involves complex 
     
     This ensures that the updated state $\mathbf{X}_{new}$ is guaranteed to stay on the manifold (e.g., a rotation matrix remains orthogonal) without needing ad-hoc normalization.
 
-    </td>
-    <td>
-      <img src="image-7.png" alt="example" width="1500">
-    </td>
-  </tr>
-</table>
-
-<table>
-  <tr>
-    <td>
+    ![alt text](images/image-7.png)
 
 3. **Consistency in State Estimation and Optimization**
     
@@ -158,12 +107,7 @@ Humanoid movement does not occur in simple Euclidean space; it involves complex 
     
     Standard Gaussian statistics assume data lives in a flat Euclidean space. Applying these directly to rotations leads to errors because the "mean" of rotations isn't just the average of their components. Lie groups allow us to define probability distributions and error functions directly in the tangent space (Lie algebra). This makes the optimization "geometry-aware," leading to faster convergence and higher accuracy in state estimation.
 
-    </td>
-    <td>
-      <img src="image-8.png" alt="example" width="1500">
-    </td>
-  </tr>
-</table>
+    ![alt text](images/image-8.png)
 
 4. **Minimal yet Unconstrained Representation**
     
@@ -173,7 +117,7 @@ Humanoid movement does not occur in simple Euclidean space; it involves complex 
 
 ### 2.1 Smooth Manifolds and Lie Groups
 
-![Lie group manifold sketch](image-9.png)
+![alt text](images/image-9.png)
 
 A Lie group $\mathcal{G}$ is a smooth manifold whose elements satisfy the fundamental group axioms: closure under composition, identity $\mathcal{E}$, inverse, and associativity.
 
@@ -189,7 +133,7 @@ The tangent space evaluated at the group's identity $\mathcal{E}$ is called the 
 - **Mathematically**: $\mathfrak{m} \triangleq T_{\mathcal{E}}\mathcal{M}$.
 - Elements of the Lie algebra are isomorphic to Cartesian vectors in $\mathbb{R}^{m}$, mapped via the linear operators $(\cdot)^{\wedge}$ (hat) and $(\cdot)^{\vee}$ (vee). For example, in $SO(3)$, a 3D angular velocity vector maps to a $3 \times 3$ skew-symmetric matrix.
 
-![Tangent space illustration](image-10.png)
+![alt text](images/image-10.png)
 
 ### 2.3 Calculus on Manifolds and Uncertainty
 
@@ -221,7 +165,7 @@ In the development and realization of the `mink` package, Lie Group theory serve
 
 Translating modular costs into real-time environments requires highly efficient computational backends. The Python library `mink` serves as an industry-standard differential IK solver built explicitly on the MuJoCo physics engine.
 
-![alt text](image-11.png)
+![alt text](images/image-11.png)
 
 ### 3.1. Rigorous State Representation on $SO(3)$ and $SE(3)$
 
@@ -346,13 +290,13 @@ Explicit constraint enforcement is the primary safeguard against self-destructio
 
 `mink` is predominantly local and reactive, which solves for the instantaneous joint velocity $\dot{\mathbf{q}}$ to track a target at time $t$. With the state space formally defined, we can cast inverse kinematics (IK) and trajectory planning as nonlinear least-squares optimization problems. A highlight of `PyRoki` is its ability to unify disparate kinematic tasks, including **Inverse Kinematics (IK)**, **Trajectory Optimization (TrajOpt)**, and **Motion Retargeting** as a single, unified optimization problem under a single modular architecture that scales across high-performance hardware. It abstracts these problems into a composition of **Kinematic Variables** and **Cost Functions**. This allows a researcher to transition from a single-frame IK problem to a multi-frame trajectory optimization problem simply by changing the variable dimension and adding temporal smoothness costs, without changing the underlying solver logic.
 
-![alt text](image-12.png)
+![alt text](images/image-12.png)
 
 ### 4.1 The Modular Paradigm (PyRoki Framework)
 
 Advanced toolkits like PyRoki separate optimization variables (e.g., joint configurations $q$) from cost functions, creating reusable components that apply seamlessly to single-frame IK, sequential trajectory optimization, and motion retargeting.
 
-![alt text](image-14.png)
+![alt text](images/image-14.png)
 
 ### 4.2 Hardware Acceleration and Massively Parallel Execution
 
@@ -404,11 +348,11 @@ Differential IK (the core of `mink`) is inherently a local method; it is prone t
 
 By optimizing the full path, PyRoki can "look ahead" to avoid future collisions or singularities that a local differential solver would fail to anticipate.
 
-![alt text](image-15.png)
+![alt text](images/image-15.png)
 
 ### Notes
 
-![alt text](image-13.png)
+![alt text](images/image-13.png)
 
 For applied impacts in humanoids:
 
@@ -427,7 +371,7 @@ The General Motion Retargeting (GMR) method represents a significant shift in th
 
 The power of GMR lies in its ability to decouple the quality of motion data from the complexity of reinforcement learning (RL) reward functions.
 
-![alt text](image-1.png)
+![alt text](images/image-1.png)
 
 ### 5.1 The "Data Quality over Reward Engineering" Insight
 
