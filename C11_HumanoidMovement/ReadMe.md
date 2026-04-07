@@ -10,15 +10,17 @@ When driving humanoid motion, whether through offline datasets or real-time spat
 
 1. **Morphological Discrepancy (The Link Length Problem)**
 
-    Even if a robot is designed to mimic human proportions, it is **almost never** an exact match. Humanoid robots have fixed mechanical link lengths $\mathbf{L}_{robot}$ that differ from the bone lengths $\mathbf{L}_{human}$ of any given human subject.
+    Even if a robot is designed to mimic human proportions, it is **almost never** an exact match. Humanoid robots have fixed mechanical link lengths $\mathbf{L}\_{robot}$ that differ from the bone lengths $\mathbf{L}\_{human}$ of any given human subject.
 
     ![alt text](images/image.png)
     
-    Mathematically, the Cartesian position of an end-effector (like a foot or hand) is a function of both joint angles and link lengths: $\mathbf{x} = f(\mathbf{q}, \mathbf{L})$. Because $\mathbf{L}_{robot} \neq \mathbf{L}_{human}$, applying the same angles $\mathbf{q}_{human}$ results in a different spatial position:
+    Mathematically, the Cartesian position of an end-effector (like a foot or hand) is a function of both joint angles and link lengths: $\mathbf{x} = f(\mathbf{q}, \mathbf{L})$. Because $\mathbf{L}\_{robot} \neq \mathbf{L}\_{human}$, applying the same angles $\mathbf{q}\_{human}$ results in a different spatial position:
     
-    ```math
-    f(\mathbf{q}_{human}, \mathbf{L}_{robot}) \neq f(\mathbf{q}_{human}, \mathbf{L}_{human})
-    ```
+$$
+f(\mathbf{q}\_{human}, \mathbf{L}\_{robot}) \neq f(\mathbf{q}\_{human}, \mathbf{L}\_{human})
+$$
+
+<img align="right" width="180px" src="images/image-4.png">
 
 2. **Geometric Artifacts: Foot Sliding and Ground Penetration**
 
@@ -28,29 +30,27 @@ When driving humanoid motion, whether through offline datasets or real-time spat
 
     - **Foot Sliding**: Because the robot's legs are a different length, the distance the foot travels during a stride will not match the human's stride length. If the robot's global root (pelvis) moves at the human's velocity but its legs are shorter, the feet will appear to "skate" or slide across the floor to keep up, breaking the physical requirement of static friction during the stance phase.
 
-    ![alt text](images/image-4.png)
-
+<img align="right" width="180px" src="images/image-3.png">
+    
 3. **Self-Collision and Workspace Incompatibility**
 
     Human joints and robot joints have different ranges of motion and physical volumes.
 
-    - **Joint Limits**: A human may be able to reach a joint angle that exceeds the mechanical hard-stops of a robot's actuator. Direct mapping would result in commanded positions that the hardware cannot physically reach.
+    - **Joint Limits**: A human may be able to reach a joint angle that exceeds the mechanical hard stops of a robot's actuator. Direct mapping would result in commanded positions that the hardware cannot physically reach.
 
     - **Self-Penetration**: Human limbs are soft and compliant. Robotic limbs are often bulky, rigid housings for motors and electronics. A human pose where the hands are close to the chest might be perfectly safe for a person, but if those same angles are mapped to a robot with thick forearms and a protruding torso, the robot's arms will collide with its own chassis.
 
-    ![alt text](images/image-3.png)
+<img align="right" width="300px" src="images/image-5.png">
 
 4. **Dynamic Instability**
 
-    Direct mapping ignores the mass distribution and Center of Mass (CoM) of the robot. A human can maintain balance in a specific pose because their CoM is positioned over their support polygon. Because a robot has a different mass distribution (e.g., heavy motors in the hips or a battery in the torso), copying the human's joint angles will shift the robot's CoM to a different relative location, often causing the robot to tip over.
-
-    ![alt text](images/image-5.png)
+    Direct mapping ignores the robot's mass distribution and Center of Mass (CoM). A human can maintain balance in a specific pose because their CoM is positioned over their support polygon. Because a robot has a different mass distribution (e.g., heavy motors in the hips or a battery in the torso), copying the human's joint angles will shift the robot's CoM to a different relative position, often causing it to tip over.
 
 **The Latest Solution: Optimization-Based Retargeting**
 
 Because direct mapping fails, researchers use Inverse Kinematics (IK) or General Motion Retargeting (GMR). Instead of copying angles, these systems treat the human data as "spatial suggestions." They define target positions for key body parts (the "key bodies") and then solve an optimization problem to find the specific $\mathbf{q}_{robot}$ that places the robot's hands and feet as close as possible to the human's targets while strictly enforcing the robot's joint limits, self-collision boundaries, and balance constraints.
 
-    ![alt text](images/image-6.png)
+![alt text](images/image-6.png)
 
 ### 1.2 Contextualizing the Pipeline
 
@@ -72,15 +72,17 @@ Humanoid movement does not occur in simple Euclidean space; it involves complex 
 - **Improve Optimization**: Allowing SLAM and IK solvers to operate on the "natural" geometry of 3D space.
 - **Maintain Validity**: Ensuring that robot states always correspond to physically possible configurations.
 
-    ![alt text](images/image-2.png)
+![alt text](images/image-2.png)
+
+<img align="right" width="200px" src="images/Gimbal_Lock_Plane.gif">
 
 1. **Avoiding Topological Singularities ([Gimbal Lock](https://en.wikipedia.org/wiki/Gimbal_lock))**
 
     Most intuitive representations of rotation, such as Euler angles (roll, pitch, yaw), suffer from "singularities." When certain orientations are reached, the mapping between the representation and the actual physical rotation becomes non-unique, and the system loses a degree of freedom. This is known as **Gimbal Lock**.
 
     Lie groups treat rotations as elements on a smooth, continuous surface called a **manifold**. Because this representation is global and geometrically consistent, it never encounters these mathematical "dead zones," ensuring that control and estimation algorithms remain stable regardless of the robot's orientation.
-    
-    ![alt text](images/Gimbal_Lock_Plane.gif)
+
+<img align="right" width="400px" src="images/image-7.png">
 
 2. **Principled Calculus: Integration and Differentiation**
 
@@ -88,18 +90,16 @@ Humanoid movement does not occur in simple Euclidean space; it involves complex 
 
     Lie groups provide a bridge between the "curved" manifold (the group) and a "flat" linear space called the Lie algebra (the tangent space).
     
-    - **The Lie Algebra ($\mathfrak{so}(3)$ or $\mathfrak{se}(3)$)**: Represents small increments of motion (velocities).
+    - **The Lie Algebra**: Represents small increments of motion (velocities), such as $\mathfrak{so}(3)$ or $\mathfrak{se}(3)$ .
     - **The Exponential Map**: A principled way to "wrap" a linear velocity vector onto the curved manifold to update a pose.
     
-    This allows us to define the "plus" ($\oplus$) and "minus" ($\ominus$) operations correctly:
+    This allows us to define the "plus" ($\oplus$) and "minus" ($\ominus$) operations correctly as below. This ensures that the updated state $\mathbf{X}\_{new}$ is guaranteed to stay on the manifold (e.g., a rotation matrix remains orthogonal) without needing ad-hoc normalization.
     
-    ```math
-    \mathbf{X}_{new} = \mathbf{X} \oplus \boldsymbol{\tau} \triangleq \mathbf{X} \cdot \exp(\boldsymbol{\tau}^\wedge)
-    ```
-    
-    This ensures that the updated state $\mathbf{X}_{new}$ is guaranteed to stay on the manifold (e.g., a rotation matrix remains orthogonal) without needing ad-hoc normalization.
+$$
+\mathbf{X}_{new} = \mathbf{X} \oplus \boldsymbol{\tau} \triangleq \mathbf{X} \cdot \exp(\boldsymbol{\tau}^\wedge)
+$$
 
-    ![alt text](images/image-7.png)
+<img align="right" width="500px" src="images/image-8.png">
 
 3. **Consistency in State Estimation and Optimization**
     
@@ -107,24 +107,24 @@ Humanoid movement does not occur in simple Euclidean space; it involves complex 
     
     Standard Gaussian statistics assume data lives in a flat Euclidean space. Applying these directly to rotations leads to errors because the "mean" of rotations isn't just the average of their components. Lie groups allow us to define probability distributions and error functions directly in the tangent space (Lie algebra). This makes the optimization "geometry-aware," leading to faster convergence and higher accuracy in state estimation.
 
-    ![alt text](images/image-8.png)
-
 4. **Minimal yet Unconstrained Representation**
     
     While Quaternions are also common in robotics, they are "redundant" (4 numbers for 3 degrees of freedom) and require a unit-norm constraint. If a quaternion's magnitude drifts away from 1.0 during a simulation, it no longer represents a valid rotation.
     
     Lie groups allow us to work with minimal coordinates (3 numbers for rotation, 6 for full pose) in the Lie algebra for calculation, while maintaining the robust, constraint-free nature of the group during storage and composition.
 
-### 2.1 Smooth Manifolds and Lie Groups
+<img align="right" width="500px" src="images/image-9.png">
 
-![alt text](images/image-9.png)
+### 2.1 Smooth Manifolds and Lie Groups
 
 A Lie group $\mathcal{G}$ is a smooth manifold whose elements satisfy the fundamental group axioms: closure under composition, identity $\mathcal{E}$, inverse, and associativity.
 
 - **Rotations**: Modeled on $SO(3)$, the group of special orthogonal matrices.
 - **Rigid Motions**: Modeled on $SE(3)$, combining rotations and translations into $4 \times 4$ transformation matrices.
 
-The smoothness of the manifold ensures the existence of a unique tangent space at each point, which is a linear space where standard calculus applies.
+The smoothness of the manifold ensures the existence of a unique tangent space at each point, a linear space in which standard calculus applies.
+
+<img align="right" width="500px" src="images/image-10.png">
 
 ### 2.2 Tangent Spaces and the Lie Algebra
 
@@ -132,8 +132,6 @@ The tangent space evaluated at the group's identity $\mathcal{E}$ is called the 
 
 - **Mathematically**: $\mathfrak{m} \triangleq T_{\mathcal{E}}\mathcal{M}$.
 - Elements of the Lie algebra are isomorphic to Cartesian vectors in $\mathbb{R}^{m}$, mapped via the linear operators $(\cdot)^{\wedge}$ (hat) and $(\cdot)^{\vee}$ (vee). For example, in $SO(3)$, a 3D angular velocity vector maps to a $3 \times 3$ skew-symmetric matrix.
-
-![alt text](images/image-10.png)
 
 ### 2.3 Calculus on Manifolds and Uncertainty
 
@@ -144,15 +142,15 @@ To integrate motion or compute geometric errors, we map elements between the lin
 
 To manipulate local tangent perturbations, we define the right-plus $\oplus$ and right-minus $\ominus$ operators:
 
-```math
+$$
 \mathcal{Y} = \mathcal{X} \oplus ^{\mathcal{X}}\tau \triangleq \mathcal{X} \circ Exp(^{\mathcal{X}}\tau) \in \mathcal{M}
-```
+$$
 
 **Uncertainty Modeling**: State uncertainty is defined rigorously on the tangent space using the expectation operator:
 
-```math
+$$
 \Sigma_{\mathcal{X}} \triangleq \mathbb{E}[(\mathcal{X} \ominus \overline{\mathcal{X}})(\mathcal{X} \ominus \overline{\mathcal{X}})^{\top}]
-```
+$$
 
 This allows us to construct mathematically sound Gaussian variables on manifolds, preventing the singularities (like gimbal lock) associated with Euler angles.
 
@@ -179,9 +177,9 @@ The "differential" aspect of mink refers to the mapping between velocities in th
 
 In Lie theory, velocities are elements of the Lie algebra $\mathfrak{g}$ (the tangent space at the identity). mink computes the relationship between the joint velocity vector $\dot{\mathbf{q}}$ and the spatial velocity $\mathbf{v}$ using the geometric Jacobian $\mathbf{J}(\mathbf{q})$. The package implements the differential IK problem as a velocity-level optimization:
 
-```math
+$$
 \min_{\dot{\mathbf{q}}} \| \mathbf{J}(\mathbf{q})\dot{\mathbf{q}} - \mathbf{v}_{target} \|^2
-```
+$$
 
 This ensures that the motion updates are computed in the local linear tangent space, where calculus is straightforward and numerically stable.
 
@@ -209,75 +207,69 @@ The capabilities of **Constraint Enforcement** and **Closed-Chain Kinematics** i
 
 1. **Constraint Enforcement**
 
-    Constraint enforcement in mink typically refers to the handling of inequality constraints within a differential Inverse Kinematics (IK) solver. This is formulated as a Quadratic Programming (QP) problem where the goal is to minimize a task-space error subject to physical and geometric limits.
+    Constraint enforcement in mink typically refers to handling inequality constraints in a differential Inverse Kinematics (IK) solver. This is formulated as a Quadratic Programming (QP) problem, with the goal of minimizing a task-space error subject to physical and geometric constraints. To prevent hardware damage, the solver must strictly adhere to the robot's mechanical hard stops and actuator velocity saturations.
 
-    - Joint Position and Velocity Limits
+- Velocity Limits: These are direct box constraints on the decision variable $\dot{\mathbf{q}}$:
 
-        To prevent hardware damage, the solver must strictly adhere to the robot's mechanical hard-stops and actuator velocity saturations.
+$$
+\dot{\mathbf{q}}_{min} \leq \dot{\mathbf{q}} \leq \dot{\mathbf{q}}_{max}
+$$
 
-        - Velocity Limits: These are direct box constraints on the decision variable $\dot{\mathbf{q}}$:
+- Position Limits: Since differential IK operates at the velocity level, position limits $\mathbf{q}_{min}$ and $\mathbf{q}_{max}$ must be projected into the velocity domain. Using a first-order Taylor expansion over a time step $\Delta t$, the velocity bounds are constrained to ensure the next state $\mathbf{q}_{t+1}$ remains feasible:
 
-        ```math
-        \dot{\mathbf{q}}_{min} \leq \dot{\mathbf{q}} \leq \dot{\mathbf{q}}_{max}
-        ```
+$$
+\frac{\mathbf{q}_{min} - \mathbf{q}_t}{\Delta t} \leq \dot{\mathbf{q}} \leq \frac{\mathbf{q}_{max} - \mathbf{q}_t}{\Delta t}
+$$
 
-        - Position Limits: Since differential IK operates at the velocity level, position limits $\mathbf{q}_{min}$ and $\mathbf{q}_{max}$ must be projected into the velocity domain. Using a first-order Taylor expansion over a time step $\Delta t$, the velocity bounds are constrained to ensure the next state $\mathbf{q}_{t+1}$ remains feasible:
+mink dynamically intersects these bounds with the actuator's intrinsic velocity limits to form the final feasible set for the optimizer.
 
-        ```math
-        \frac{\mathbf{q}_{min} - \mathbf{q}_t}{\Delta t} \leq \dot{\mathbf{q}} \leq \frac{\mathbf{q}_{max} - \mathbf{q}_t}{\Delta t}
-        ```
-
-    mink dynamically intersects these bounds with the actuator's intrinsic velocity limits to form the final feasible set for the optimizer.
-
-    - Collision Avoidance
+- Collision Avoidance
+    
+Collision avoidance is realized as a nonlinear inequality constraint. mink utilizes MuJoCo’s collision detection to compute the signed distance $d$ and the contact normal $\mathbf{n}$ between arbitrary geometric primitives (geoms).
+    
+To maintain a safety buffer $\eta$, the solver enforces a constraint that prevents the relative velocity of two geoms from decreasing the distance too rapidly when they are within the influence zone. This is often modeled using the Collision Avoidance Limit (CAL) formulation:
         
-        Collision avoidance is realized as a nonlinear inequality constraint. mink utilizes MuJoCo’s collision detection to compute the signed distance $d$ and the contact normal $\mathbf{n}$ between arbitrary geometric primitives (geoms).
+$$
+\mathbf{n}^{\top} \mathbf{J}_{rel}(\mathbf{q}) \dot{\mathbf{q}} \geq -\xi \frac{d - \eta}{d_{max} - \eta}
+$$
         
-        To maintain a safety buffer $\eta$, the solver enforces a constraint that prevents the relative velocity of two geoms from decreasing the distance too rapidly when they are within the influence zone. This is often modeled using the Collision Avoidance Limit (CAL) formulation:
-        
-        ```math
-        \mathbf{n}^{\top} \mathbf{J}_{rel}(\mathbf{q}) \dot{\mathbf{q}} \geq -\xi \frac{d - \eta}{d_{max} - \eta}
-        ```
-        
-        where $\mathbf{J}_{rel}$ is the relative Jacobian between the two geoms and $\xi$ is a gain parameter. This ensures that as $d \rightarrow \eta$, the permissible velocity toward the obstacle approaches zero.
+where $\mathbf{J}_{rel}$ is the relative Jacobian between the two geoms and $\xi$ is a gain parameter. This ensures that as $d \rightarrow \eta$, the permissible velocity toward the obstacle approaches zero.
         
 2. **Closed-Chain Kinematics**
 
-    Closed-chain kinematics occur when a robot's configuration forms a topological loop, such as a humanoid with both hands gripping a single tool or a parallel manipulator. These systems are characterized by holonomic constraints that restrict the degrees of freedom (DoF) of the system.
+    Closed-chain kinematics occur when a robot's configuration forms a topological loop, such as a humanoid with both hands gripping a single tool or a parallel manipulator. These systems are characterized by holonomic constraints that restrict the system's degrees of freedom (DoF).
     
-    - Mathematical Formulation of Loop Closures
+- Mathematical Formulation of Loop Closures: A kinematic loop is defined by an algebraic equality constraint in the configuration space:
+        
+$$
+h(\mathbf{q}) = \mathbf{0}
+$$
+        
+In differential IK, this must be satisfied at the velocity level. By differentiating with respect to time, we obtain the linearized equality constraint:
+        
+$$
+\frac{\partial h}{\partial \mathbf{q}} \dot{\mathbf{q}} = \mathbf{J}_{eq}(\mathbf{q}) \dot{\mathbf{q}} = \mathbf{0}
+$$
+        
+where $\mathbf{J}_{eq}$ is the Jacobian of the equality constraints.
+        
+- Implementation in `mink` via MuJoCo
+
+`mink` leverages MuJoCo’s equality constraint definitions (e.g., `connect`, `weld`, `joint`, or `gear`).
     
-        A kinematic loop is defined by an algebraic equality constraint in the configuration space:
+- **Task Specification**: When a task is defined in a closed-chain system, mink incorporates the matrix $\mathbf{J}_{eq}$ into the optimization problem.
+
+- **Solver Integration**: The optimizer solves the following constrained problem:
         
-        ```math
-        h(\mathbf{q}) = \mathbf{0}
-        ```
+$$
+\min_{\dot{\mathbf{q}}} \frac{1}{2} \| \mathbf{J}_{task}\dot{\mathbf{q}} - \mathbf{v}_{target} \|^2_{\mathbf{W}} + \lambda \| \dot{\mathbf{q}} \|^2
+$$
+
+$$
+\text{subject to } \mathbf{J}_{eq}\dot{\mathbf{q}} = \mathbf{0}
+$$
         
-        In differential IK, this must be satisfied at the velocity level. By differentiating with respect to time, we obtain the linearized equality constraint:
-        
-        ```math
-        \frac{\partial h}{\partial \mathbf{q}} \dot{\mathbf{q}} = \mathbf{J}_{eq}(\mathbf{q}) \dot{\mathbf{q}} = \mathbf{0}
-        ```
-        
-        where $\mathbf{J}_{eq}$ is the Jacobian of the equality constraints.
-        
-    - Implementation in mink via MuJoCo
-    
-        `mink` leverages MuJoCo’s equality constraint definitions (e.g., `connect`, `weld`, `joint`, or `gear`).
-        
-        - **Task Specification**: When a task is defined in a closed-chain system, mink incorporates the matrix $\mathbf{J}_{eq}$ into the optimization problem.
-        
-        - **Solver Integration**: The optimizer solves the following constrained problem:
-        
-        ```math
-        \min_{\dot{\mathbf{q}}} \frac{1}{2} \| \mathbf{J}_{task}\dot{\mathbf{q}} - \mathbf{v}_{target} \|^2_{\mathbf{W}} + \lambda \| \dot{\mathbf{q}} \|^2
-        ```
-        
-        ```math
-        \text{subject to } \mathbf{J}_{eq}\dot{\mathbf{q}} = \mathbf{0}
-        ```
-        
-        By solving for $\dot{\mathbf{q}}$ in the null-space of $\mathbf{J}_{eq}$, `mink` ensures that the robot moves toward its goal while strictly maintaining the integrity of the kinematic loops (e.g., keeping the hands fixed to the tool).
+By solving for $\dot{\mathbf{q}}$ in the null-space of $\mathbf{J}_{eq}$, `mink` ensures that the robot moves toward its goal while strictly maintaining the integrity of the kinematic loops (e.g., keeping the hands fixed to the tool).
 
 ### [Refer to the Documentation for more details](https://kevinzakka.github.io/mink/tutorial/tasks_and_limits.html)
 
@@ -288,7 +280,7 @@ Explicit constraint enforcement is the primary safeguard against self-destructio
 - [PyRoki: A Modular Toolkit for Robot Kinematic Optimization](https://arxiv.org/abs/2505.03728)
     - Chung Min Kim, Brent Yi, Hongsuk Choi, Yi Ma, Ken Goldberg, Angjoo Kanazawa
 
-`mink` is predominantly local and reactive, which solves for the instantaneous joint velocity $\dot{\mathbf{q}}$ to track a target at time $t$. With the state space formally defined, we can cast inverse kinematics (IK) and trajectory planning as nonlinear least-squares optimization problems. A highlight of `PyRoki` is its ability to unify disparate kinematic tasks, including **Inverse Kinematics (IK)**, **Trajectory Optimization (TrajOpt)**, and **Motion Retargeting** as a single, unified optimization problem under a single modular architecture that scales across high-performance hardware. It abstracts these problems into a composition of **Kinematic Variables** and **Cost Functions**. This allows a researcher to transition from a single-frame IK problem to a multi-frame trajectory optimization problem simply by changing the variable dimension and adding temporal smoothness costs, without changing the underlying solver logic.
+`mink` is predominantly local and reactive, which solves for the instantaneous joint velocity $\dot{\mathbf{q}}$ to track a target at time $t$. With the state space formally defined, we can cast inverse kinematics (IK) and trajectory planning as nonlinear least-squares optimization problems. A highlight of `PyRoki` is its ability to unify disparate kinematic tasks, including **Inverse Kinematics (IK)**, **Trajectory Optimization (TrajOpt)**, and **Motion Retargeting**, into a single optimization problem within a modular architecture that scales across high-performance hardware. It abstracts these problems into a composition of **Kinematic Variables** and **Cost Functions**. This allows a researcher to transition from a single-frame IK problem to a multi-frame trajectory optimization problem simply by changing the number of variables and adding temporal smoothness costs, without altering the underlying solver logic.
 
 ![alt text](images/image-12.png)
 
@@ -306,7 +298,7 @@ A significant limitation of many physics-engine-based solvers is their reliance 
 
 - **Hardware Agnosticism**: It executes seamlessly on **CPUs**, **GPUs**, and **TPUs**.
 
-- **Vectorized Optimization**: While `mink` is optimized for a single robot's IK, PyRoki can optimize thousands of trajectories or retargeting sequences in parallel. This is indispensable for generating large-scale synthetic datasets for Reinforcement Learning (RL) or for real-time "model predictive" style kinematic planning where multiple candidate paths are evaluated simultaneously.
+- **Vectorized Optimization**: While `mink` is optimized for a single robot's IK, PyRoki can optimize thousands of trajectories or retargeting sequences in parallel. This is indispensable for generating large-scale synthetic datasets for Reinforcement Learning (RL) or for real-time "model predictive" style kinematic planning, where multiple candidate paths are evaluated simultaneously.
 
 ### 4.3 Modular Cost Abstraction and Differentiability
 
@@ -314,37 +306,37 @@ PyRoki’s architecture follows a "building block" approach that separates the r
 
 - **Composable Costs**: Users can mix and match pre-defined costs, such as `LimitCost`, `PoseCost`, `CollisionCost`, and `ManipulabilityCost`, or define custom semantic costs (e.g., "keep the camera upright while reaching").
 
-- **Automatic Differentiation (Auto-Diff)**: Because it utilizes JAX, PyRoki computes **analytical, block-sparse Jacobians** for any arbitrary cost function automatically. In mink, adding a new, complex cost requires ensuring its gradient is compatible with the underlying MuJoCo/C solver. In PyRoki, as long as the cost is written in JAX-compatible Python, the gradient is handled by the framework.
+- **Automatic Differentiation (Auto-Diff)**: Because it utilizes JAX, PyRoki computes **analytical, block-sparse Jacobians** for any arbitrary cost function automatically. In mink, adding a new, complex cost requires ensuring its gradient is compatible with the underlying MuJoCo/C solver. In PyRoki, as long as the cost is written in JAX-compatible Python, the framework handles the gradient.
 
-    - **Joint Pose Cost**: Penalizes the deviation between the current and target base poses. Using the Lie group logarithm ensures geometric fidelity:
+- **Joint Pose Cost**: Penalizes the deviation between the current and target base poses. Using the Lie group logarithm ensures geometric fidelity:
 
-    ```math
-    c_{pose}(\mathbf{q}, \mathbf{T}_{target}) = \frac{1}{2} \left\| \log\left(\mathbf{T}_{target}^{-1} \mathbf{T}_{i}(\mathbf{q})\right)^\vee \right\|_{\mathbf{W}}^2
-    ```
+$$
+c_{pose}(\mathbf{q}, \mathbf{T}_{target}) = \frac{1}{2} \left\| \log\left(\mathbf{T}_{target}^{-1} \mathbf{T}_{i}(\mathbf{q})\right)^\vee \right\|_{\mathbf{W}}^2
+$$
 
-    - **Manipulability Cost**: Maximizes Yoshikawa's manipulability measure to keep the robot away from singularities, utilizing the manipulator Jacobian $J_{i}(q)$:
+- **Manipulability Cost**: Maximizes Yoshikawa's manipulability measure to keep the robot away from singularities, utilizing the manipulator Jacobian $J_{i}(q)$:
 
-    ```math
-    c_{manip}(\mathbf{q}, i) = \left( \sqrt{\det\left(\mathbf{J}_{i}(\mathbf{q})\mathbf{J}_{i}(\mathbf{q})^{\top}\right)} + \epsilon \right)^{-1}
-    ```
+$$
+c_{manip}(\mathbf{q}, i) = \left( \sqrt{\det\left(\mathbf{J}_{i}(\mathbf{q})\mathbf{J}_{i}(\mathbf{q})^{\top}\right)} + \epsilon \right)^{-1}
+$$
 
-    - **Collision Avoidance**: Signed distances $d$ between collision geometries (e.g., capsules/spheres) are computed and converted into costs. A smooth activation function avoids discontinuities at $d=0$:
+- **Collision Avoidance**: Signed distances $d$ between collision geometries (e.g., capsules/spheres) are computed and converted into costs. A smooth activation function avoids discontinuities at $d=0$:
 
-    ```math
-    d_{c} = \begin{cases} 
-    -d + 0.5\eta & \text{if } d < 0 \\ 
-    \frac{0.5}{\eta}(-d + \eta)^{2} & \text{if } 0 < d < \eta \\ 
-    0 & \text{otherwise} 
-    \end{cases}
-    ```
+$$
+d_{c} = \begin{cases} 
+-d + 0.5\eta & \text{if } d < 0 \\ 
+\frac{0.5}{\eta}(-d + \eta)^{2} & \text{if } 0 < d < \eta \\ 
+0 & \text{otherwise} 
+\end{cases}
+$$
 
 ### 4.4 Global vs. Local Optimality
 
 Differential IK (the core of `mink`) is inherently a local method; it is prone to local minima and "greedy" behavior that may lead to joint singularities or unavoidable collisions later in a motion.PyRoki enables **Trajectory Optimization**, which considers the entire time horizon $\mathbf{q}_{1:T}$ simultaneously. Mathematically, it solves:
 
-```math
+$$
 \min_{\mathbf{q}_{1:T}} \sum_{t=1}^T c_{task}(\mathbf{q}_t) + \sum_{t=1}^{T-1} c_{smooth}(\mathbf{q}_t, \mathbf{q}_{t+1})
-```
+$$
 
 By optimizing the full path, PyRoki can "look ahead" to avoid future collisions or singularities that a local differential solver would fail to anticipate.
 
@@ -375,19 +367,19 @@ The power of GMR lies in its ability to decouple the quality of motion data from
 
 ### 5.1 The "Data Quality over Reward Engineering" Insight
 
-Historically, researchers used relatively "dirty" motion retargeting (containing foot sliding or self-collisions) and relied on complex RL reward functions and domain randomization to teach the robot to "ignore" these errors.
+Historically, researchers used relatively "dirty" motion retargeting (e.g., foot-sliding or self-collisions) and relied on complex RL reward functions and domain randomization to teach the robot to "ignore" these errors.
 
 GMR demonstrates that high-fidelity retargeting is a primary determinant of policy success. By suppressing "extensive reward tuning," the GMR framework proves that if the reference trajectory is geometrically sound and physically feasible, the RL agent can learn robust locomotion with a much simpler, more intuitive reward structure. This emphasizes the importance of **kinematic integrity** in the early stages of the motion pipeline.
 
 ### 5.2 Non-Uniform Local Scaling (Morphology-Awareness)
 
-Uniform scaling (resizing the entire skeleton by a single height ratio) is the most common source of retargeting artifacts. Because human and robot bone-length ratios differ (the embodiment gap), uniform scaling causes the robot’s feet to either hover above or penetrate the floor.
+Uniform scaling (resizing the entire skeleton by a single height ratio) is the most common source of retargeting artifacts. Because human and robot bone-length ratios differ (the embodiment gap), uniform scaling causes the robot’s feet to either hover above the floor or penetrate it.
 
 GMR introduces a **non-uniform local scaling** factor $s_{b}$ for each body link. This allows the system to preserve the spatial relationship between the robot’s end-effectors and the environment while respecting its specific mechanical proportions. The target Cartesian position for a body $b$ is formulated as:
 
-```math
+$$
 \mathbf{p}_{b}^{target} = \frac{h}{h_{ref}} s_{b} (\mathbf{p}_{j}^{source} - \mathbf{p}_{root}^{source}) + \frac{h}{h_{ref}} s_{root} \mathbf{p}_{root}^{source}
-```
+$$
 
 This explicit scaling ensures that critical contact events, like a foot hitting the ground, are preserved during the transfer process.
 
@@ -403,15 +395,15 @@ This separation prevents the solver from collapsing into awkward, physically imp
 
 ### 5.4 Direct Integration with High-Performance Solvers
 
-GMR is particularly powerful because it is designed to utilize modern, efficient backends like the mink package. By leveraging MuJoCo’s native collision detection and C-optimized hot paths, GMR can solve complex whole-body retargeting tasks with thousands of frames in a matter of seconds or even in real-time.
+GMR is particularly powerful because it is designed to leverage modern, efficient backends such as the mink package. By leveraging MuJoCo’s native collision detection and C-optimized hot paths, GMR can solve complex whole-body retargeting tasks with thousands of frames in a matter of seconds or even in real-time.
 
-This highlights the synergy between **mathematical modeling** (non-uniform scaling) and **software realization** (mink/MuJoCo). The result is a system that can produce the massive, high-fidelity datasets required for training state-of-the-art embodied AI agents without the need for manual, frame-by-frame cleanup.
+This highlights the synergy between **mathematical modeling** (non-uniform scaling) and **software realization** (mink/MuJoCo). The result is a system that can produce the massive, high-fidelity datasets required to train state-of-the-art embodied AI agents without manual, frame-by-frame cleanup.
 
 ### Notes
 
-In a research context, GMR provides a benchmark for evaluating other retargeting methods (like PHC or ProtoMotions). It proves that **retargeting matters**: a robot's ability to imitate a human is not just a function of the learning algorithm, but of the geometric mapping that bridges the two different physical worlds.
+In a research context, GMR serves as a benchmark for evaluating other retargeting methods (such as PHC or ProtoMotions). It proves that **retargeting matters**: a robot's ability to imitate a human is not just a function of the learning algorithm but also of the geometric mapping that bridges the two physical worlds.
 
-In applied scenarios, such as teleoperation or motion capture, GMR ensures that the robot’s movements appear natural and perceptually faithful to the human source while remaining strictly within the mechanical limits of the hardware. This makes it a foundational tool for developing interactive humanoid ecosystems where real-time fidelity is paramount.
+In applied scenarios such as teleoperation or motion capture, GMR ensures that the robot’s movements appear natural and perceptually faithful to the human source while remaining strictly within the hardware's mechanical limits. This makes it a foundational tool for developing interactive humanoid ecosystems where real-time fidelity is paramount.
 
 ## Concluding Remarks
 
@@ -423,7 +415,7 @@ To conclude this lecture on Humanoid Movement, we reflect on the transition from
 
 - **The "Retargeting Matters" Paradigm**: The GMR framework has taught us that the quality of our data is as important as the complexity of our learning algorithms. By solving the embodiment gap through non-uniform scaling and multi-stage optimization, we provide our RL agents with a "clean" foundation, significantly reducing the need for reward engineering and improving sim-to-real transfer.
 
-- **Integration with Physics Engines**: Tools like mink demonstrate the necessity of tight integration between kinematic solvers and physics engines like MuJoCo. Real-time constraint enforcement—handling joint limits, self-collisions, and loop closures—is the final bridge that makes high-performance humanoid movement safe and deployable.
+- **Integration with Physics Engines**: Tools like mink demonstrate the necessity of tight integration between kinematic solvers and physics engines like MuJoCo. Real-time constraint enforcement, handling joint limits, self-collisions, and loop closures, is the final bridge that makes high-performance humanoid movement safe and deployable.
 
 As we look toward the future of humanoid research and the expansion of interactive ecosystems, the role of the roboticist is evolving. We are no longer just building machines; we are designing **the mapping layers** that allow human intent to flow seamlessly into robotic embodiment.
 
