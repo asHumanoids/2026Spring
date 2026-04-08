@@ -64,7 +64,7 @@ Core literatures related to this course are as the following:
 
 ## Module 03 Selected Topics on Humanoid Robotics
 
-### Class 11 on Apr 08 (Wed): Humanoid Movement
+### Class 11 on Apr 08 (Wed): [Humanoid Movement](https://github.com/asHumanoids/2026Spring/tree/main/C11_HumanoidMovement)
 
 ### Class 12 on Apr 10 (Fri): Humanoid Contact
 
