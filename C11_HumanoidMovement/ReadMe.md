@@ -2,6 +2,9 @@
 
 ## 1: Introduction and The Embodiment Gap
 
+- [Towards a Natural Motion Generator: a Pipeline to Control a Humanoid based on Motion Data](https://la.disneyresearch.com/wp-content/uploads/iros2019_retarget.pdf)
+    - Sungjoon Choi, Joohyung Kim
+
 ### 1.1 Defining the Core Problem
 
 The fundamental challenge in transferring human motion to humanoid robots is the embodiment gap. Human subjects and target humanoids possess distinct topological and morphological differences, including variances in bone length, joint range of motion, kinematic structure, body shape, and mass distribution.
