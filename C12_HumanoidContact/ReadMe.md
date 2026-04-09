@@ -7,7 +7,7 @@
 3. Contact mechanics for humanoid robots
 4. Humanoid dynamics under contact
 5. Balance and stability under contact
-6. Contact sensing, tactile information, and state estimation
+6. Contact sensing and state estimation
 7. Planning with contact
 8. Contact-aware control
 9. From theory to implementation
@@ -15,7 +15,7 @@
 11. Summary of key takeaways
 12. Suggested implementation roadmap for students
 13. References for further study
-14. Source note
+
 
 # 1. Motivation and scope
 
@@ -47,15 +47,14 @@ The correct mental model is therefore not “the robot tracks a trajectory.” T
 
 ## 1.3 Scope of these notes
 
-These notes focus on **rigid-body contact modeling for humanoids** and the associated control stack. The emphasis is on principles that remain useful across platforms:
+These notes focus on **rigid-body contact modeling for humanoids**, together with the sensing, estimation, and planning ideas needed to use those models in practice. The emphasis is on principles that remain useful across platforms:
 
-- torque-controlled humanoids;
-- quasi-direct-drive humanoids;
 - research humanoids in MuJoCo, Isaac Lab, or similar simulators;
-- whole-body loco-manipulation systems;
-- contact-aware learning pipelines.
+- floating-base multibody models of bipeds and humanoids;
+- humanoid systems that rely on contact sensing and contact-state estimation;
+- planning problems involving footsteps, hand supports, and multi-contact loco-manipulation.
 
-We do **not** attempt a complete treatment of complementarity theory, nonsmooth analysis, deformable contact mechanics, or tactile manipulation at the level of a dedicated dexterous manipulation course. Instead, the goal is a unified working understanding that connects the mathematics to the way advanced humanoid systems are actually implemented.
+We do **not** attempt a complete treatment of complementarity theory, nonsmooth analysis, deformable contact mechanics, or tactile manipulation at the level of a dedicated dexterous manipulation course. We also intentionally omit detailed material on humanoid control and humanoid learning, since those are reserved for subsequent classes. The goal here is a unified working understanding that connects contact mechanics and constrained dynamics to estimation, tactile reasoning, contact planning, and implementation-oriented modeling.
 
 # 2. Mathematical preliminaries and notation
 
@@ -64,18 +63,18 @@ We do **not** attempt a complete treatment of complementarity theory, nonsmooth 
 A humanoid is modeled as a multibody system with a free-floating base and actuated joints. Let
 
 $$
-\mathbf{q} = \begin{bmatrix} \mathbf{q}_b \\ \mathbf{q}_a \end{bmatrix},
+q = \begin{bmatrix} q_b \\ q_a \end{bmatrix},
 $$
 
-where $\mathbf{q}_b$ denotes the floating-base configuration and $\mathbf{q}_a \in \mathbb{R}^{n_a}$ denotes the actuated joint coordinates. In practice, $q_b$ may be represented by base position plus orientation, often using a quaternion or rotation matrix internally for numerical robustness.
+where $q_b$ denotes the floating-base configuration and $q_a \in \mathbb{R}^{n_a}$ denotes the actuated joint coordinates. In practice, $q_b$ may be represented by base position plus orientation, often using a quaternion or rotation matrix internally for numerical robustness.
 
 A velocity representation is often more convenient than differentiating the configuration coordinates directly. Let
 
 $$
-\mathbf{v} = \begin{bmatrix} \mathbf{v}_b \\ \dot{\mathbf{q}}_a \end{bmatrix},
+v = \begin{bmatrix} v_b \\ \dot q_a \end{bmatrix},
 $$
 
-where $\mathbf{v}_b \in \mathbb{R}^6$ is the spatial base velocity, containing linear and angular components.
+where $v_b \in \mathbb{R}^6$ is the spatial base velocity, containing linear and angular components.
 
 The distinction between $q$ and $v$ matters because floating-base orientation is not always minimally represented in a globally smooth way. Most rigid-body algorithms therefore work with generalized configuration $q$ and generalized velocity $v$ rather than naively using $\dot q$ everywhere.
 
@@ -84,16 +83,16 @@ The distinction between $q$ and $v$ matters because floating-base orientation is
 Because only the internal joints are actuated, the generalized torque vector enters through a selection matrix $S$:
 
 $$
-\mathbf{M}(\mathbf{q})\dot{\mathbf{v}} + \mathbf{h}(\mathbf{q},\mathbf{v}) = \mathbf{S}^T \boldsymbol{\tau} + \sum_i \mathbf{J}_i(\mathbf{q})^T \boldsymbol{\lambda}_i.
+M(q)\dot v + h(q,v) = S^T \tau + \sum_i J_i(q)^T \lambda_i.
 $$
 
 Here:
 
-- $\mathbf{M}(\mathbf{q})$ is the generalized mass matrix;
-- $\mathbf{h}(\mathbf{q},\mathbf{v})$ collects Coriolis, centrifugal, gravitational, and sometimes passive terms;
-- $\boldsymbol{\tau} \in \mathbb{R}^{n_a}$ are joint torques;
-- $\mathbf{J}_i(\mathbf{q})$ is the Jacobian of contact $i$;
-- $\boldsymbol{\lambda}_i$ is the contact wrench or contact force parameter for that contact.
+- $M(q)$ is the generalized mass matrix;
+- $h(q,v)$ collects Coriolis, centrifugal, gravitational, and sometimes passive terms;
+- $\tau \in \mathbb{R}^{n_a}$ are joint torques;
+- $J_i(q)$ is the Jacobian of contact $i$;
+- $\lambda_i$ is the contact wrench or contact force parameter for that contact.
 
 The presence of $S^T \tau$ rather than an arbitrary generalized force vector is the formal expression of **underactuation**. The robot cannot directly command the base wrench. It can only influence the base through internal actuation and external contacts.
 
@@ -102,26 +101,26 @@ The presence of $S^T \tau$ rather than an arbitrary generalized force vector is 
 Let a contact point or contact frame be attached to a body of the robot. Its spatial velocity can be written as
 
 $$
-\mathbf{v}_c = \mathbf{J}_c(\mathbf{q}) \mathbf{v}.
+v_c = J_c(q) v.
 $$
 
 If the contact is assumed to stick, then the relative velocity with respect to the environment is constrained. For a stationary environment contact, the ideal sticking condition is
 
 $$
-\mathbf{J}_c(\mathbf{q}) \mathbf{v} = \mathbf{0}.
+J_c(q) v = 0.
 $$
 
 Differentiating yields the acceleration-level contact constraint:
 
 $$
-\mathbf{J}_c(\mathbf{q}) \dot{\mathbf{v}} + \dot{\mathbf{J}}_c(\mathbf{q},\mathbf{v}) \mathbf{v} = \mathbf{0}.
+J_c(q) \dot v + \dot J_c(q,v) v = 0.
 $$
 
 This is the standard way contact enters inverse dynamics and whole-body control formulations.
 
 ## 2.4 A note on frames and wrenches
 
-Humanoid contact calculations are full of frame conventions. You may easily lose track of signs, moments, and Jacobians because frames are not handled consistently. A useful discipline is:
+Humanoid contact calculations are full of frame conventions. Students commonly lose track of signs, moments, and Jacobians because frames are not handled consistently. A useful discipline is:
 
 - always state in which frame a wrench is expressed;
 - always state where the wrench is applied;
@@ -139,7 +138,7 @@ Most environment contacts in humanoid locomotion are unilateral. The robot can p
 A common way to describe unilateral contact is with a gap function $\phi(q)$ satisfying
 
 $$
-\phi(\mathbf{q}) \ge 0.
+\phi(q) \ge 0.
 $$
 
 Interpretation:
@@ -157,7 +156,7 @@ $$
 The familiar complementarity intuition is
 
 $$
-\phi(\mathbf{q})\,\lambda_n = 0,
+\phi(q)\,\lambda_n = 0,
 $$
 
 which encodes the idea that either the bodies are separated and the normal force vanishes, or they are in contact and a compressive force may appear.
@@ -169,10 +168,10 @@ This relation is conceptually important even if a given simulator or controller 
 At a contact, the tangential force is limited by friction. In the classical isotropic Coulomb model,
 
 $$
-\lVert \mathbf{f}_t \rVert \le \mu f_n,
+\|f_t\| \le \mu f_n,
 $$
 
-where $\mathbf{f}_t$ is the tangential contact-force vector, $f_n$ is the normal force magnitude, and $\mu$ is the friction coefficient.
+where $f_t$ is the tangential force magnitude, $f_n$ is the normal force magnitude, and $\mu$ is the friction coefficient.
 
 This yields two regimes:
 
@@ -213,10 +212,10 @@ The advantage is computational: linear inequalities fit naturally into quadratic
 
 ## 3.4 Contact wrenches
 
-A point force acting at contact point $\mathbf{p}$ induces not only a force but also a moment about a chosen reference point $\mathbf{o}$. The combined quantity is a **wrench**:
+A point force acting at contact point $p$ induces not only a force but also a moment about a reference point. The combined quantity is a **wrench**:
 
 $$
-\mathbf{w} = \begin{bmatrix} \mathbf{f} \\ \boldsymbol{\mu} \end{bmatrix}, \qquad \boldsymbol{\mu} = (\mathbf{p} - \mathbf{o}) \times \mathbf{f}.
+w = \begin{bmatrix} f \\ \tau \end{bmatrix}, \qquad \tau = p \times f.
 $$
 
 For a finite foot contact, the actual pressure distribution over the sole is distributed, but one often models its net effect as a resultant wrench subject to feasibility constraints. This viewpoint is crucial because humanoid feet can sustain not only vertical support forces but also moments due to distributed pressure over a finite support area.
@@ -238,7 +237,7 @@ Walking is not a single smooth dynamical system. It is a **hybrid system**. Duri
 At impact, the generalized velocity can change abruptly. A standard impulsive model writes
 
 $$
-\mathbf{M}(\mathbf{q})(\mathbf{v}^+ - \mathbf{v}^-) = \mathbf{J}_c(\mathbf{q})^T \boldsymbol{\Lambda},
+M(q)(v^+ - v^-) = J_c(q)^T \Lambda,
 $$
 
 where $v^-$ and $v^+$ are the pre- and post-impact generalized velocities and $\Lambda$ is the contact impulse.
@@ -246,7 +245,7 @@ where $v^-$ and $v^+$ are the pre- and post-impact generalized velocities and $\
 For a perfectly plastic sticking impact, one additionally imposes
 
 $$
-\mathbf{J}_c(\mathbf{q}) \mathbf{v}^+ = \mathbf{0}.
+J_c(q) v^+ = 0.
 $$
 
 Even when a practical controller does not explicitly solve impact equations online, the conceptual distinction between within-mode continuous dynamics and mode-switch events is essential.
@@ -258,7 +257,7 @@ Even when a practical controller does not explicitly solve impact equations onli
 The standard constrained rigid-body dynamics equation for a humanoid is
 
 $$
-\mathbf{M}(\mathbf{q}) \dot{\mathbf{v}} + \mathbf{h}(\mathbf{q},\mathbf{v}) = \mathbf{S}^T \boldsymbol{\tau} + \mathbf{J}_c(\mathbf{q})^T \boldsymbol{\lambda}.
+M(q) \dot v + h(q,v) = S^T \tau + J_c(q)^T \lambda.
 $$
 
 This equation is the backbone of nearly every modern whole-body controller. It says that generalized acceleration is determined by inertia, bias forces, joint torques, and environmental contact forces.
@@ -276,32 +275,32 @@ Third, contact changes the effective capabilities of the robot. A floating-base 
 Assume a contact is sticking. Then
 
 $$
-\mathbf{J}_c(\mathbf{q}) \mathbf{v} = \mathbf{0}.
+J_c(q) v = 0.
 $$
 
 Differentiating gives
 
 $$
-\mathbf{J}_c(\mathbf{q}) \dot{\mathbf{v}} + \dot{\mathbf{J}}_c(\mathbf{q},\mathbf{v}) \mathbf{v} = \mathbf{0}.
+J_c(q) \dot v + \dot J_c(q,v) v = 0.
 $$
 
-The constrained dynamics problem is then to solve for $(\dot{\mathbf{v}}, \boldsymbol{\lambda})$ given torques and contact mode.
+The constrained dynamics problem is then to solve for $(\dot v, \lambda)$ given torques and contact mode.
 
 One can write the coupled linear system
 
 $$
 \begin{bmatrix}
-\mathbf{M} & -\mathbf{J}_c^T \\
-\mathbf{J}_c & \mathbf{0}
+M & -J_c^T \\
+J_c & 0
 \end{bmatrix}
 \begin{bmatrix}
-\dot{\mathbf{v}} \\
-\boldsymbol{\lambda}
+\dot v \\
+\lambda
 \end{bmatrix}
 =
 \begin{bmatrix}
-\mathbf{S}^T\boldsymbol{\tau} - \mathbf{h} \\
--\dot{\mathbf{J}}_c \mathbf{v}
+S^T\tau - h \\
+-\dot J_c v
 \end{bmatrix}.
 $$
 
@@ -336,23 +335,23 @@ In control, one often specifies desired tasks such as CoM acceleration, swing-fo
 A generic optimization-based inverse dynamics problem may choose decision variables
 
 $$
-(\dot{\mathbf{v}}, \boldsymbol{\tau}, \boldsymbol{\lambda})
+(\dot v, \tau, \lambda)
 $$
 
 and solve
 
 $$
-\min_{\dot{\mathbf{v}}, \boldsymbol{\tau}, \boldsymbol{\lambda}} \; \text{task tracking error} + \text{regularization}
+\min_{\dot v, \tau, \lambda} \; \text{task tracking error} + \text{regularization}
 $$
 
 subject to
 
 $$
-\mathbf{M}\dot{\mathbf{v}} + \mathbf{h} = \mathbf{S}^T\boldsymbol{\tau} + \mathbf{J}_c^T\boldsymbol{\lambda},
+M\dot v + h = S^T\tau + J_c^T\lambda,
 $$
 
 $$
-\mathbf{J}_c\dot{\mathbf{v}} + \dot{\mathbf{J}}_c \mathbf{v} = \mathbf{0},
+J_c\dot v + \dot J_c v = 0,
 $$
 
 plus torque limits and friction constraints.
@@ -364,11 +363,11 @@ This turns the contact problem into a structured numerical optimization problem 
 For planning and balance reasoning, the full robot dynamics are often reduced to **centroidal dynamics**. Let $c$ denote the CoM, $m$ the total mass, and $L_c$ the angular momentum about the CoM. Then
 
 $$
-m \ddot{\mathbf{c}} = \sum_i \mathbf{f}_i + m\mathbf{g},
+m \ddot c = \sum_i f_i + mg,
 $$
 
 $$
-\dot{\mathbf{L}}_c = \sum_i (\mathbf{p}_i - \mathbf{c}) \times \mathbf{f}_i + \sum_i \boldsymbol{\mu}_i.
+\dot L_c = \sum_i (p_i - c) \times f_i + \sum_i \tau_i.
 $$
 
 These equations isolate the global effect of contact wrenches on the whole body. They ignore many internal details but preserve what matters for support, momentum, and balance.
@@ -376,7 +375,7 @@ These equations isolate the global effect of contact wrenches on the whole body.
 A standard and very useful relationship is the centroidal momentum map
 
 $$
-\mathbf{h}_G = \mathbf{A}_G(\mathbf{q}) \mathbf{v},
+h_G = A_G(q) v,
 $$
 
 where $h_G$ concatenates linear and angular momentum and $A_G(q)$ is the centroidal momentum matrix. This representation, emphasized in centroidal dynamics formulations, is a cornerstone for planning and whole-body control.
@@ -406,7 +405,7 @@ For flat-foot locomotion, two classical notions are central.
 
 ### Center of pressure (CoP)
 
-The CoP is the point on the support surface where the net pressure distribution is effectively applied. If the foot wrench is known, the CoP can be extracted from the contact-moment components.
+The CoP is the point on the support surface where the net pressure distribution is effectively applied. If the foot wrench is known, the CoP can be extracted from the moment components.
 
 ### Zero moment point (ZMP)
 
@@ -457,7 +456,7 @@ Although modern humanoid controllers often go beyond ZMP, it remains pedagogical
 
 The mistake is not teaching ZMP. The mistake is stopping there.
 
-# 6. Contact sensing and state estimation
+# 6. Contact sensing, tactile information, and state estimation
 
 ## 6.1 Why modeling alone is insufficient
 
@@ -470,130 +469,54 @@ Rigid-body models never fully determine what is happening at the contact interfa
 - actuator latency and backlash;
 - partial contacts and contact patch evolution.
 
-Therefore, humanoid control must estimate contact state online rather than assuming it is perfectly known.
+Therefore, a humanoid system must estimate contact state online rather than assuming it is perfectly known.
 
-## 6.2 A hierarchy of tactile information
+## 6.2 Common sensing modalities
 
-A useful way to organize contact sensing is to distinguish four levels of information:
-
-1. **sensor-level signals**, such as raw taxel values, force–torque measurements, vibration, temperature, or pre-contact proximity;
-2. **contact-level information**, such as contact position, contact normal, local curvature, normal and tangential force, contact moment, making/breaking contact events, or slip;
-3. **object- or environment-level information**, such as shape, pose, mass distribution, terrain type, foothold geometry, or local material properties;
-4. **action-level information**, such as how to choose the next action, how to adapt a running action using tactile feedback, when to terminate an action, and how to infer whether the action succeeded.
-
-This hierarchy is valuable in humanoid robotics because it makes clear that sensing is not only about measuring force. The controller does not act on raw taxels directly. It acts on estimated contact state, inferred environment properties, and action-level decisions built on top of lower-level tactile information.
-
-## 6.3 Sensor modalities and body-region coverage
-
-Humanoid platforms typically combine several sensing modalities:
+Humanoid platforms typically use a combination of the following:
 
 - ankle or wrist six-axis force–torque sensors;
-- joint torque sensors or motor-current-based force estimates;
+- joint torque sensors or motor current estimates;
 - IMUs for floating-base acceleration and angular velocity;
-- tactile arrays or pressure sensors on feet, hands, arms, or torso;
-- vibration-sensitive sensing for contact onset and slip;
-- vision for terrain geometry, contact anticipation, and object localization;
-- in some systems, proximity or pre-touch sensing to anticipate imminent contact.
+- tactile arrays or pressure sensors on the feet or hands;
+- vision for terrain geometry and contact anticipation.
 
-An important design principle is that **sensor coverage should follow function**. Hands need high spatial and temporal resolution for dexterous interaction, slip detection, and local geometry estimation. Feet need robust load-bearing sensing, good shear tolerance, and pressure distribution awareness. Whole-body skin on arms or torso usually operates at lower spatial resolution, but must tolerate large loads and large-area contact during bracing, safe human interaction, or object transport.
+Modern simulation platforms expose similar abstractions. MuJoCo includes unified frictional contact handling with configurable contact models and friction dimensions in the solver documentation, while Isaac Lab provides physics-based contact sensing abstractions that report net contact force on selected bodies and can be filtered by interacting geometry. These tools are valuable, but their semantics must be understood before they are trusted in state estimation, contact reasoning, or planning studies.
 
-This immediately leads to an implementation insight: there is no single “best tactile sensor” for humanoids. Sensor design depends on where the sensor is mounted, what force range it must survive, what bandwidth the control loop requires, and whether the downstream objective is grasp control, foothold assessment, whole-body compliance, or contact-aware planning.
+## 6.3 Contact state estimation
 
-## 6.4 Tactile sensing on the hands
-
-On dexterous hands, tactile sensing supports much more than grasp-force measurement. The hand can estimate:
-
-- contact position on the fingertip or palm;
-- contact normal and local surface geometry;
-- normal and tangential forces;
-- incipient slip and gross slip;
-- object texture, stiffness, and sometimes temperature-related properties.
-
-For humanoid manipulation, these signals support several functions. First, they improve **grasp controllability** through force regulation and slip-aware grasp adaptation. Second, they enable **interactive perception**, where the hand explores an object in order to refine its local geometry or identify uncertain properties. Third, they provide **dynamic contact-state information** during in-hand manipulation, where the robot must reason about how local contact changes affect both object motion and whole-body balance.
-
-A key research lesson is that tactile hands are not only estimation devices; they are action-conditioning devices. Tactile feedback changes how the robot chooses and executes manipulation strategies.
-
-## 6.5 Tactile sensing on the feet
-
-Foot-contact sensing deserves special emphasis in humanoid robotics because ankle force–torque sensing alone is not always enough. A six-axis sensor at the ankle can estimate the net wrench transmitted through the foot, but it does not directly reveal the full contact patch, local pressure distribution, terrain microgeometry, or foothold quality.
-
-A foot tactile array or pressure-sensitive sole can provide information such as:
-
-- contact patch location and shape;
-- pressure distribution over the sole;
-- center of pressure evolution;
-- local terrain slope;
-- terrain class or foothold type;
-- early warning of edge contact, partial contact, or incipient slip.
-
-For locomotion, this matters because the robot does not interact with an abstract ground plane. It interacts with a finite, uncertain foothold. In rough terrain, a controller that knows only the total ground reaction wrench may miss the fact that the contact is concentrated on a small edge or that the foothold is softer or more slippery than expected.
-
-From an implementation standpoint, foot tactile sensing is hard because humanoid feet experience large intermittent impacts, high shear, and repeated load cycles. Sensor packaging, durability, wiring, and time synchronization become as important as estimation accuracy.
-
-## 6.6 Whole-body tactile sensing
-
-Whole-body tactile sensing extends the same logic beyond hands and feet to the arms, torso, legs, and possibly joints. This is especially valuable for humanoid robots because many advanced behaviors are not fingertip-only and not foot-only. They involve contact with large body regions.
-
-Whole-body tactile sensing supports:
-
-- safe physical human–robot interaction;
-- compliant contact with walls, rails, furniture, or large objects;
-- collision awareness in clutter;
-- whole-arm or whole-torso bracing;
-- tactile exploration of large objects that are not fully visible;
-- large-object transport and balancing during whole-body loco-manipulation.
-
-This is conceptually important for the lecture notes because it reframes contact from a narrow “support foot” or “end-effector” issue into a general whole-body interaction problem. Once multiple body regions can become informative contacts, sensing and control can no longer be separated cleanly. The sensed contact pattern itself becomes part of the task representation.
-
-## 6.7 Contact-level estimation
-
-The most immediate outputs of a contact estimator are contact-level quantities. Typical estimation outputs include:
+Typical estimation outputs include:
 
 - binary contact/no-contact indicators;
-- estimated normal force and tangential force;
-- estimated contact point or pressure-weighted center;
-- estimated contact normal or local surface orientation;
-- estimated CoP or pressure distribution for feet;
-- contact events such as making contact, breaking contact, or sliding contact;
-- slip or incipient-slip detection.
+- estimated normal force;
+- estimated CoP or pressure distribution;
+- slip detection;
+- phase identification during gait.
 
-A simple detector might threshold the vertical ground reaction force. A more robust estimator fuses force, joint kinematics, vibration signatures, and IMU consistency. In tactile manipulation, a pressure-weighted centroid over activated taxels may approximate contact position. For feet, the pressure map over the sole may reveal whether the robot is on a flat support, an edge, or a partially supported patch.
+A simple detector might threshold the vertical ground reaction force. A more robust estimator fuses force, joint kinematics, and IMU consistency. For example, if a foot is believed to be in stance, then its velocity relative to the world should be approximately zero. This contact condition can be used as a pseudo-measurement in a state estimator for the floating base.
 
-From a mathematical viewpoint, the estimator attempts to infer latent contact variables from noisy measurements and structural constraints. In the simplest case this is threshold logic; in more advanced cases it is a Bayesian filtering or learned inference problem.
+## 6.4 Contact-aided base estimation
 
-## 6.8 Contact-aided base estimation
-
-One of the most important implementation patterns in humanoid robotics is to treat a reliable stance contact as a temporary anchor for estimating the floating base. When a contact is trusted, the estimator can use
+One of the most important implementation patterns in humanoid robotics is to treat a stance foot as a temporary anchor for estimating the floating base. When a contact is reliable, the estimator can use
 
 $$
-\mathbf{J}_c(\mathbf{q}) \mathbf{v} \approx \mathbf{0}
+J_c(q) v \approx 0
 $$
 
-as a measurement relation. This sharply reduces drift and can make the difference between a stable and unstable controller.
+as a measurement relation. This sharply reduces drift and can make the difference between a usable and an unusable state-estimation pipeline.
 
-The risk is equally important: if the controller believes a slipping foot is rigidly anchored, the estimator will inject false information and may destabilize the robot. Therefore, contact-aided state estimation should never be separated conceptually from contact confidence estimation.
+The risk is obvious: if the controller believes a slipping foot is rigidly anchored, the estimator will inject false information and may destabilize the robot.
 
-## 6.9 Object- and environment-level inference
+## 6.5 Practical estimator design
 
-Beyond local contacts, tactile sensing can support object- or environment-level inference. For manipulation, the hand may combine multiple contacts over time to infer object pose, local shape, mass-related properties, or contact-relevant material properties such as stiffness and friction. For locomotion, the feet may infer terrain categories, slope, roughness, or foothold geometry.
+A robust humanoid estimator typically combines:
 
-This point is worth stressing in a graduate course: the robot does not need a full volumetric model of the environment for contact-aware control. It often needs a smaller set of contact-relevant latent variables. For example, the controller may only need to know that the foothold is narrow, compliant, and sloped, or that the object contact is slipping and its local friction is lower than expected.
+- IMU propagation for short-horizon inertial consistency;
+- joint encoders for kinematic reconstruction;
+- contact hypotheses from force and kinematic consistency;
+- delayed or low-rate exteroceptive correction from vision or motion capture.
 
-## 6.10 Action-level tactile feedback and multimodal fusion
-
-The tactile review highlights a point that is highly relevant for humanoids: tactile information is not only used to estimate the current contact state, but also to decide **what to do next**. Action-level tactile information includes:
-
-- selecting the next exploratory or manipulation action;
-- initializing action parameters from prior tactile experience;
-- adapting a running action through tactile servoing;
-- triggering reflex-like responses such as grip-force increase under incipient slip;
-- terminating an action when a contact event indicates success or failure;
-- verifying whether the action outcome matches the task goal.
-
-This idea carries over naturally to humanoid locomotion and loco-manipulation. A foot tactile event may trigger replanning of the next step. A whole-arm contact may switch a controller from collision avoidance to compliant obstacle clearing. A hand contact on a rail may change whether the next motion is treated as pure locomotion or as multi-contact support.
-
-In practice, the most robust systems fuse tactile sensing with proprioception and vision. Vision predicts candidate contacts and terrain geometry; proprioception gives kinematic consistency and joint effort; tactile sensing confirms what contact actually occurred and whether the interaction is proceeding as intended. This multimodal fusion is one of the key themes for implementation-oriented humanoid systems.
-
+A common engineering principle is to separate **contact detection**, **contact confidence**, and **contact use**. Binary logic alone is fragile. Confidence-weighted fusion is often far more stable.
 
 # 7. Planning with contact
 
@@ -609,19 +532,7 @@ For manipulators, it is often sufficient to plan a smooth end-effector path plus
 
 Thus, humanoid planning is often best understood as **planning over contact modes**.
 
-## 7.2 Planning variables: state, contact, and force
-
-A useful refinement, emphasized in recent humanoid planning surveys, is to distinguish the planning variables explicitly.
-
-A full loco-manipulation planner may need to reason about:
-
-- **state variables**, such as CoM motion, centroidal momentum, joint configuration, and object state;
-- **contact variables**, such as contact position, contact timing, and contact mode;
-- **force variables**, such as contact force or wrench distribution across active contacts.
-
-This decomposition is valuable because it clarifies why humanoid planning is difficult. The robot is not merely choosing a configuration trajectory. It is simultaneously choosing how to support itself and how to exchange forces with the environment or manipulated objects.
-
-## 7.3 Contact sequence planning
+## 7.2 Contact sequence planning
 
 At the highest level, a planner may choose a discrete sequence such as
 
@@ -631,23 +542,9 @@ $$
 
 Each mode determines a new set of active constraints and admissible wrenches. This combinatorial structure is a major source of complexity.
 
-Contact sequence planning is especially difficult when the environment is cluttered or the task is multi-contact loco-manipulation, such as stepping while pushing a door or climbing while using a handrail.
+Contact sequence planning is especially difficult when the environment is cluttered or the task is multi-contact loco-manipulation, such as stepping while pushing a door.
 
-## 7.4 Multi-contact trajectory planning versus static pose planning
-
-In humanoid applications it is useful to distinguish at least two planning regimes.
-
-### Multi-contact trajectory planning
-
-This regime plans over a horizon and reasons jointly about contact mode, contact location, contact force, and state evolution. It is the right abstraction for dynamic tasks such as carrying an object while walking, traversing with hand support, or pushing a cart while maintaining balance.
-
-### Static pose planning or pose optimization
-
-This regime focuses on the current time step or a small local horizon and solves for a feasible whole-body pose, contact placement, and force distribution. It is lighter computationally and often useful for generating feasible intermediate configurations, initializing trajectory optimization, or checking whether a bracing posture is possible.
-
-The distinction matters in implementation. Trajectory planning offers anticipatory coordination but is computationally expensive. Pose planning is often cheaper and easier to deploy online, but it does not by itself solve long-horizon transition feasibility.
-
-## 7.5 Reduced-order and hierarchical planning
+## 7.3 Reduced-order planning
 
 A practical strategy is to separate planning into levels.
 
@@ -661,63 +558,39 @@ Plan centroidal trajectories, CoM motion, angular momentum evolution, and feasib
 
 ### Low level
 
-Generate joint trajectories and control commands consistent with the full robot kinematics and dynamics.
+Generate joint-space motions, contact timings, and kinematic refinements consistent with the full robot geometry and dynamics.
 
-This hierarchy is not merely a convenience. It reflects the fact that full-body contact planning in raw joint space is too expensive and too opaque for most tasks. It also mirrors how successful humanoid systems are often built: a predictive reduced-order planner feeds a reactive whole-body controller.
+This hierarchy is not merely a convenience. It reflects the fact that full-body contact planning in the raw joint space is too expensive and too opaque for most tasks.
 
-## 7.6 Contact-implicit planning and trajectory optimization
-
-A major open direction in humanoid planning is to avoid pre-specifying the full contact schedule. In **contact-implicit planning** or **contact-implicit trajectory optimization (CITO)**, the optimization attempts to solve for body motion, contact position, contact force, and contact mode simultaneously.
-
-Conceptually, the problem becomes
-
-$$
-\min_{\mathbf{x}_{0:T},\,\mathbf{u}_{0:T-1},\,\boldsymbol{\lambda}_{0:T-1},\,\text{contact variables}} J
-$$
-
-subject to
-
-$$
-\mathbf{x}_{t+1} = f(\mathbf{x}_t, \mathbf{u}_t, \boldsymbol{\lambda}_t),
-$$
-
-contact feasibility constraints, unilateral constraints, friction constraints, actuator limits, and some representation of contact-mode logic.
-
-The attraction of CITO is obvious: it unifies motion planning and contact planning. The challenge is equally obvious: the problem is highly nonconvex, often nonsmooth, and combinatorial in the number of possible contact modes. For humanoid loco-manipulation, solving such a problem online remains difficult.
-
-## 7.7 Planning methods
+## 7.4 Planning methods
 
 Three broad families appear repeatedly.
 
-### Sampling- and search-based methods
+### Search-based methods
 
-These explicitly explore contact placements or mode sequences. They are intuitive, can be paired with task-specific heuristics, and often handle discrete contact choices naturally. Their main weakness is the explosion of the search space in high-dimensional multi-contact settings.
+These explicitly search over contact placements or modes. They are intuitive and can leverage heuristics, but the search tree grows quickly.
 
 ### Optimization-based methods
 
-These formulate trajectory optimization or MPC problems with dynamic constraints, contact constraints, friction constraints, and task objectives. Their strength is dynamic consistency and the ability to encode rich continuous constraints. Their weaknesses are numerical sensitivity, tuning burden, and the possibility of local infeasibility.
+These formulate a trajectory optimization or MPC problem with contact constraints, friction constraints, and task objectives. They can capture dynamics more faithfully, but contact switching introduces nonconvexity or mixed-integer structure.
 
-### Learning-assisted methods
+## 7.5 Contact-implicit planning
 
-A growing line of work uses learned policies or learned heuristics to propose contact strategies, warm-start optimizers, or imitate optimized motion. These methods can be flexible and fast at runtime, but they still inherit the limitations of data coverage, safety encoding, and sim-to-real mismatch.
+A more ambitious formulation is to plan body motion, contact timing, contact forces, and even contact activation together. This is often called **contact-implicit trajectory optimization**. Instead of prescribing a contact schedule in advance, the optimization decides which contacts should exist and when they should be active, subject to dynamics, collision, and complementarity-style contact constraints.
 
-For graduate students, the right mental model is not that one family has “won.” The current field is hybrid. Search handles discrete structure well, optimization handles physical feasibility well, and learning can accelerate difficult subproblems or provide reactive generalization.
+The attraction of contact-implicit planning is obvious: it offers a unified statement of “find a physically feasible behavior.” The difficulty is equally obvious: the resulting optimization is highly nonconvex, may include nonsmooth or mixed-integer structure, and is often expensive for full humanoid models.
 
-## 7.8 Motion planning with contact models
+For graduate study, the important lesson is conceptual. Contact planning variables are not limited to pose and timing. They often include:
 
-Once a contact sequence is known or hypothesized, the motion planner still needs an interaction model. A common choice is centroidal dynamics, because it preserves the dependence of global motion on contact forces and angular momentum. For active contacts indexed by $i$,
+- contact mode;
+- contact location and geometry;
+- contact force or wrench;
+- mode-transition timing;
+- reduced-order momentum or centroidal trajectories.
 
-$$
-m \ddot{\mathbf{c}} = \sum_i \mathbf{f}_i + m\mathbf{g},
-$$
+A planning formulation becomes more expressive as more of these variables are optimized jointly, but it also becomes harder to solve reliably.
 
-$$
-\dot{\mathbf{L}}_c = \sum_i (\mathbf{p}_i - \mathbf{c}) \times \mathbf{f}_i + \sum_i \boldsymbol{\mu}_i.
-$$
-
-This model is especially useful for multi-contact MPC. It represents support forces explicitly while remaining smaller than the full rigid-body model. Its limitation is that it still contains nonlinear coupling between state and contact wrench variables, and it does not by itself resolve frequent contact switches as cleanly as simpler locomotion-only models.
-
-## 7.9 A conceptual example: stair climbing with a handrail
+## 7.6 A conceptual example: stair climbing with a handrail
 
 A contact-aware planner for stair climbing with a handrail must answer several questions.
 
@@ -725,236 +598,94 @@ A contact-aware planner for stair climbing with a handrail must answer several q
 2. Is the handrail grasp or support contact necessary for feasibility, or merely helpful for robustness?
 3. Can the chosen stance foot and hand contact jointly support the required centroidal wrench during the step-up phase?
 4. Is the upper-body posture kinematically compatible with the lower-body step and with self-collision avoidance?
-5. How should the transition be staged so that the swing-foot touchdown does not destabilize the upper-body support contact?
+5. How should the transition be staged so that the swing foot touchdown does not destabilize the upper-body support contact?
 
-The point of this example is that contact planning is fundamentally a **coupled mobility and force-feasibility** problem.
+The point of this example is that contact planning is fundamentally a **coupled mobility and force feasibility** problem.
 
 
-# 8. Contact-aware control
 
-## 8.1 Why joint-space position control is not enough
+# 8. From theory to implementation
 
-Suppose a humanoid uses a purely stiff joint-space tracking controller and commands the hand to follow a path that accidentally intersects a wall. In free space, the controller behaves acceptably. At contact, however, the same stiffness can create a large unmodeled force spike.
+## 8.1 A practical implementation stack without full control design
 
-This illustrates a central lesson: **contact tasks are not purely position tasks**. They are coupled motion–force tasks.
+Even before a dedicated control class, students can build a substantial humanoid contact pipeline by focusing on the layers that precede or surround low-level control design:
 
-## 8.2 Impedance control
+### Layer 1: geometric and inertial modeling
 
-A standard remedy is impedance control. Rather than commanding exact position, the controller imposes a desired dynamic relation between displacement and force. In task space, a simple impedance law has the form
+Build the floating-base rigid-body model, define contact frames, and verify mass properties, collision geometry, and foot or hand contact patches.
 
-$$
-\mathbf{F} = \mathbf{K}(\mathbf{x}_d - \mathbf{x}) + \mathbf{D}(\dot{\mathbf{x}}_d - \dot{\mathbf{x}}) + \mathbf{M}_d(\ddot{\mathbf{x}}_d - \ddot{\mathbf{x}}).
-$$
+### Layer 2: sensing and state estimation
 
-This does not magically solve contact, but it makes the interaction behavior far more physically reasonable.
+Estimate floating-base state, contact state, and terrain or object interaction cues from force, IMU, encoder, tactile, and vision signals.
 
-Impedance control is attractive because it:
+### Layer 3: contact-mode logic
 
-- softens impact and contact uncertainty;
-- tolerates moderate modeling errors;
-- provides an intuitive behavior-level interface.
+Determine which contacts are intended, which are detected, and which are trusted strongly enough to enter estimation or planning.
 
-Its limitation is that whole-body balance and contact feasibility still have to be coordinated globally.
+### Layer 4: reduced-order planning
 
-## 8.3 Admittance control
+Generate footholds, contact schedules, and centroidal or CoM references that are dynamically plausible, even if no full whole-body controller is yet implemented.
 
-In admittance control, measured force is converted into motion adjustment. This is often useful when the inner actuation loop is position-controlled and one wants to realize compliant behavior by modifying motion commands based on sensed interaction force.
+### Layer 5: simulation and validation infrastructure
 
-Impedance and admittance are dual in spirit. The right choice depends on the underlying actuation architecture and what variables can be commanded reliably.
+Create repeatable scenarios, perturbation tests, logging tools, and diagnostics for checking contact consistency, friction margin, impact timing, and estimator drift.
 
-## 8.4 Hybrid force–motion control
+This stack is already rich enough for a strong graduate project. It also provides the natural prerequisite structure for later classes on humanoid control and humanoid learning.
 
-Certain directions at a contact are constrained and should be force-regulated, while others are free and should remain motion-regulated. This leads to hybrid force–motion control.
+## 8.2 What to model explicitly in simulation
 
-A classic example is a hand sliding along a wall:
-
-- along the wall normal direction, regulate contact force;
-- along the tangential direction, regulate motion.
-
-For humanoids, this principle generalizes to support contacts and whole-body tasks. One never truly controls “position only” or “force only” everywhere. The controller partitions task directions according to contact geometry and task intent.
-
-## 8.5 Whole-body control
-
-Whole-body control (WBC) is the dominant framework for torque-controlled humanoids. The idea is to solve for generalized accelerations, torques, and contact forces that satisfy rigid-body dynamics while tracking multiple tasks.
-
-Typical tasks include:
-
-- CoM acceleration or momentum regulation;
-- base orientation stabilization;
-- swing-foot tracking;
-- hand pose or force tracking;
-- posture regularization;
-- contact force shaping.
-
-A typical optimization-based WBC problem can be written as
-
-$$
-\min_{\dot{\mathbf{v}}, \boldsymbol{\tau}, \boldsymbol{\lambda}} \sum_k w_k \lVert \mathbf{A}_k \dot{\mathbf{v}} - \mathbf{b}_k \rVert^2 + \rho_\tau \lVert \boldsymbol{\tau} \rVert^2 + \rho_\lambda \lVert \boldsymbol{\lambda} \rVert^2
-$$
-
-subject to
-
-$$
-\mathbf{M}\dot{\mathbf{v}} + \mathbf{h} = \mathbf{S}^T\boldsymbol{\tau} + \mathbf{J}_c^T\boldsymbol{\lambda},
-$$
-
-$$
-\mathbf{J}_c \dot{\mathbf{v}} + \dot{\mathbf{J}}_c \mathbf{v} = \mathbf{0},
-$$
-
-plus friction and torque constraints.
-
-A hierarchical controller may instead solve tasks in strict priority, ensuring that lower-priority posture objectives never violate higher-priority balance constraints.
-
-## 8.6 Momentum control
-
-Many humanoid controllers regulate linear and angular momentum, often through centroidal dynamics. A momentum controller effectively determines what net contact wrench is required to realize a desired CoM and angular momentum evolution. A lower-level controller then distributes this wrench across the active contacts while respecting friction and contact geometry.
-
-This split is powerful because it mirrors the physics:
-
-- centroidal dynamics decides what the whole body must do globally;
-- whole-body inverse dynamics decides how the limbs and contacts realize it.
-
-## 8.7 Internal forces in multi-contact
-
-In multi-contact settings, some contact force variations do not change the net external wrench on the body. These are **internal forces**. They are common in bracing and grasp-like support configurations.
-
-Examples:
-
-- pressing simultaneously with both hands against opposite walls;
-- redistributing load between two feet without changing net CoM acceleration;
-- maintaining preload in a handrail support while the net support wrench remains unchanged.
-
-Internal-force regulation matters because it affects:
-
-- slip margin;
-- structural load distribution;
-- stability of contact transitions;
-- safety of environment interaction.
-
-## 8.8 Model predictive control
-
-Model predictive control (MPC) is often used at the centroidal or reduced-order level. Over a finite horizon, it optimizes future contact forces, CoM motion, or footsteps under simplified dynamics and constraints.
-
-MPC is attractive because it naturally handles preview information. A robot that knows where the next foothold is can regulate not only the current state but also the future contact transition.
-
-A common architecture is:
-
-- high-rate whole-body inverse dynamics or QP controller;
-- lower-rate MPC generating desired momentum, CoM, or contact-force references.
-
-## 8.9 Tactile feedback in low-level control and action monitoring
-
-The control implications of tactile sensing go beyond state estimation. Tactile information can close the loop at several time scales.
-
-At the fastest time scale, tactile feedback supports **servoing and reflexes**. A hand controller may regulate contact pressure while tracing a surface, a grasp controller may increase normal force when incipient slip is detected, and a support controller may react to unexpected pressure redistribution under the foot.
-
-At a slower time scale, tactile information supports **action monitoring**. The controller may decide that a contact transition has completed, that a foothold is unsafe, that a large object has shifted against the torso, or that a hand support failed to establish the intended load path.
-
-This viewpoint is important for humanoids because it connects tactile sensing to hybrid control logic. A controller is not only solving for continuous torques. It is also deciding when to switch contact modes, when to escalate compliance, when to replan, and when to terminate or retry an action.
-
-## 8.10 Contact transition control
-
-Many failures happen not during steady contact, but during transitions:
-
-- touchdown impact excites unmodeled vibrations;
-- liftoff happens before weight has been fully transferred;
-- a hand contact is created too quickly and causes an impulse-like disturbance;
-- a nominally rigid contact actually slips during load transfer.
-
-A good contact transition strategy therefore includes:
-
-- touchdown velocity shaping;
-- gradual force ramping;
-- compliance at landing;
-- transition-aware estimator logic;
-- controller task switching with hysteresis, not instantaneous binary jumps.
-
-> **Implementation principle.** If a humanoid controller looks good in steady-state plots but fails on hardware, the first place to inspect is often not the stance controller itself but the contact transition logic.
-
-
-# 9. From theory to implementation
-
-## 9.1 A practical control stack
-
-A robust humanoid implementation usually contains at least five layers.
-
-### Layer 1: perception and state estimation
-
-Estimate floating-base state, joint state, contact state, and terrain information.
-
-### Layer 2: contact-mode logic
-
-Determine which contacts are intended, which are detected, and which are trusted.
-
-### Layer 3: planner
-
-Generate footsteps, contact schedules, and reduced-order motion references.
-
-### Layer 4: whole-body controller
-
-Convert references into dynamically feasible accelerations, torques, and contact forces.
-
-### Layer 5: low-level actuation
-
-Track torque or position commands with motor-level control, rate limiting, and safety checks.
-
-The failure mode of many student projects is to implement Layer 4 beautifully while Layers 1, 2, and 5 remain underdeveloped. In practice, those layers are often what determines whether the controller survives first hardware contact.
-
-## 9.2 What to model explicitly in simulation
-
-A simulator is not useful merely because it has rigid-body dynamics. It is useful when it represents the uncertainties that dominate closed-loop behavior.
+A simulator is not useful merely because it has rigid-body dynamics. It is useful when it represents the uncertainties that dominate contact behavior.
 
 For humanoid contact tasks, the most important items are often:
 
-- actuator delay and bandwidth;
-- torque saturation;
+- actuator delay and bandwidth, insofar as they affect sensed motion and contact timing;
 - contact friction coefficients and their variation;
-- foot geometry and collision shapes;
-- terrain height and compliance uncertainty;
-- sensor noise and estimator latency.
+- foot geometry, hand geometry, and collision shapes;
+- terrain height, slope, roughness, and possible compliance uncertainty;
+- sensor noise, bias, and estimator latency;
+- impact timing and contact detection semantics.
 
-MuJoCo's documentation is especially useful for understanding how the solver handles frictional contact, friction dimensions, and the distinction between elliptic and pyramidal cones. Isaac Lab's documentation is useful for understanding the semantics of physics-based contact sensing and how contact-force signals are exposed to the learning or control code.
+MuJoCo's documentation is especially useful for understanding how the solver handles frictional contact, friction dimensions, and the distinction between elliptic and pyramidal cones. Isaac Lab's documentation is useful for understanding the semantics of physics-based contact sensing and how contact-force signals are exposed to higher-level estimation and planning code.
 
 The lesson is that “high-fidelity” does not always mean visually rich. It means **faithful to the failure modes that matter**.
 
-## 9.3 Choosing a contact model
+## 8.3 Choosing a contact model
 
 In simulation, contact is always an approximation. The right approximation depends on the research question.
 
-### For control prototyping
+### For mechanics and estimation studies
 
-Use a stable rigid contact model with conservative friction and simple foot geometry. Prioritize solver stability and repeatability.
+Use a stable rigid-contact model with conservative friction and simple foot or hand geometry. Prioritize solver stability, repeatability, and interpretable contact signals.
 
-### For locomotion learning
+### For terrain and foothold studies
 
-Randomize friction, restitution, delays, and terrain. The goal is not exact prediction of one run but robustness of the policy across plausible conditions.
+Represent the terrain features that matter to support quality: height variation, slope, edges, roughness, or deformability. Contact patch interpretation becomes more important than visual realism.
 
-### For contact-rich manipulation or assembly
+### For contact-rich manipulation or assembly studies
 
-Contact patch fidelity, geometry resolution, and tangential compliance become much more important.
+Contact patch fidelity, geometry resolution, and tangential compliance become much more important, because local geometry and partial contact evolution may dominate the outcome.
 
-## 9.4 Numerical conditioning and debugging
+## 8.4 Numerical conditioning and debugging
 
 A few implementation issues recur constantly.
 
 ### Ill-conditioned Jacobians
 
-Near singular configurations or poor contact geometry, the contact Jacobian or task Jacobians can become ill-conditioned. Regularization is not optional.
+Near singular configurations or poor contact geometry, the contact Jacobian or reduced planning Jacobians can become ill-conditioned. Regularization is not optional.
 
 ### Inconsistent contact assumptions
 
-If the estimator assumes a stance foot is rigidly fixed while the controller simultaneously commands a motion inconsistent with that assumption, the entire stack will become brittle.
+If the estimator assumes a stance foot is rigidly fixed while the planning logic implicitly requires motion inconsistent with that assumption, the entire stack becomes brittle.
 
-### Overconstrained optimization
+### Overconstrained formulations
 
-Students often write a QP with too many hard constraints and then wonder why it becomes infeasible. A practical rule is: dynamics and true contact feasibility should be hard; many task objectives should be soft.
+Students often write estimators or planners with too many hard assumptions. A practical rule is: hard constraints should represent genuine mechanics or unambiguous sensing relations; many modeling preferences should remain soft.
 
 ### Timing mismatch
 
-If the planner, estimator, and WBC run at different rates without consistent buffering or timestamp handling, contact transitions become unreliable.
+If the estimator, contact detector, and planner run at different rates without consistent buffering or timestamp handling, contact transitions become unreliable.
 
-## 9.5 Debugging strategy
+## 8.5 Debugging strategy
 
 A productive debugging sequence is:
 
@@ -963,44 +694,50 @@ A productive debugging sequence is:
 3. verify CoP and normal force consistency in quiet standing;
 4. verify friction margin under small horizontal pushes;
 5. verify one swing-foot touchdown event;
-6. only then attempt continuous walking or loco-manipulation.
+6. only then attempt repeated stepping, hand support, or loco-manipulation planning.
 
-In other words, do not debug “walking” first. Debug the physics of one reliable contact, then one reliable transition.
+In other words, do not debug “walking” first. Debug the physics of one reliable contact, then one reliable transition, then the sequence.
 
-## 9.6 Sim-to-real understanding
+## 8.6 Sim-to-real understanding
 
-The sim-to-real gap in humanoid contact is rarely due to one missing coefficient. It usually arises from **structural mismatch**:
+For humanoid contact, the sim-to-real gap is rarely a single issue. It is usually a collection of mismatches:
 
-- contact occurs at the wrong time because of estimator delay;
-- foot compliance changes impact and CoP evolution;
-- the actuator cannot realize the torque-rate implied by the solver;
-- unmodeled friction hysteresis or slip changes the support wrench.
+- contact geometry is simplified;
+- friction is different from what was assumed;
+- impacts are softer or harder than in simulation;
+- sensing delays and estimator confidence are miscalibrated;
+- the robot makes partial contacts that were never modeled explicitly.
 
-A useful engineering mindset is to treat contact robustness as a distributional problem, not a nominal-model problem. This is why modern simulation platforms emphasize domain randomization, contact sensing, and scalable training of robust locomotion and manipulation behaviors.
+A strong implementation culture therefore treats transfer as a modeling-and-measurement problem, not only as a software-deployment problem.
 
-# 10. Research directions and open problems
+# 9. Research directions and open problems
 
-## 10.1 Learning contact-rich loco-manipulation
+## 9.1 Tactile and distributed contact sensing
 
-Recent research has increasingly combined model-based trajectory optimization with learning-based tracking or policy synthesis for multi-contact loco-manipulation. The important conceptual shift is that learning is no longer used only for low-level reactive control; it is increasingly used to absorb contact uncertainties and recover from disturbances while preserving a structured task formulation.
-
-A strong research direction is therefore not “replace mechanics with learning,” but rather:
-
-> use mechanics to define the right structure, then use learning to supply robustness, adaptation, and perception-conditioned behavior inside that structure.
-
-## 10.2 Tactile and distributed contact sensing
-
-Humanoid contact control still relies heavily on sparse force–torque sensing and indirect inference. Rich tactile sensing on feet, shins, forearms, and hands could significantly improve:
+Humanoid contact reasoning still relies heavily on sparse force–torque sensing and indirect inference. Rich tactile sensing on feet, shins, forearms, torso, and hands could significantly improve:
 
 - contact localization;
 - early slip detection;
 - estimation of partial contact patches;
 - safer human contact;
-- compliant whole-body bracing.
+- compliant whole-body bracing;
+- terrain and object-property estimation.
 
 This is one of the clearest ways in which humanoid contact and dexterous manipulation research are converging.
 
-## 10.3 Beyond rigid contact
+## 9.2 Foot tactile sensing and terrain understanding
+
+For locomotion, foot tactile sensing remains underexplored relative to ankle force–torque sensing. Yet it can provide information that a single wrench estimate cannot: pressure distribution, local terrain slope, edge contact, patch shape, and possibly terrain class or compliance.
+
+A major research question is how to convert such dense foothold information into compact variables that are directly useful for estimation and planning.
+
+## 9.3 Whole-body tactile sensing for humanoid loco-manipulation
+
+Whole-body tactile sensing extends contact perception beyond fingertips and foot soles. It enables contact-rich behaviors involving forearms, torso, thighs, and shins, especially in cluttered environments or during large-object interaction.
+
+The open problem is not merely to build large-area sensing skins. It is to integrate distributed contact information into a coherent multibody model so that the robot can reason about support, collision, and purposeful bracing within a single framework.
+
+## 9.4 Beyond rigid contact
 
 Rigid contact is a powerful abstraction, but many important behaviors involve compliance:
 
@@ -1010,20 +747,20 @@ Rigid contact is a powerful abstraction, but many important behaviors involve co
 - objects being manipulated deform;
 - soft protective covers alter impact and friction.
 
-A major open challenge is how to incorporate compliant or deformable contact into real-time control without making the model intractable.
+A major open challenge is how to incorporate compliant or deformable contact into real-time estimation and planning without making the model intractable.
 
-## 10.4 Contact-aware embodied intelligence
+## 9.5 Contact-implicit planning at humanoid scale
 
-Large perception models and vision-language-action systems are drawing significant attention, but physical competence still bottlenecks on contact. A humanoid that understands a command semantically but cannot make and regulate contact reliably is not yet a physically capable agent.
+Contact-implicit planning is conceptually elegant, but full humanoid problems remain difficult because of high dimensionality, many candidate contact surfaces, and strongly nonconvex mode transitions.
 
-This suggests a broader research thesis:
+Important open questions include:
 
-- perception and language determine **what** the robot should do;
-- contact-aware planning and control determine **whether it can do it physically**.
+- how to scale contact-implicit methods to whole-body humanoids;
+- how to combine geometric search with optimization efficiently;
+- how to incorporate tactile observations into contact-plan revision;
+- how to certify or at least diagnose physical feasibility during mode changes.
 
-A mature humanoid intelligence stack will require both.
-
-# 11. Summary of key takeaways
+# 10. Summary of key takeaways
 
 The main lessons of this manuscript can be summarized as follows.
 
@@ -1036,24 +773,24 @@ The main lessons of this manuscript can be summarized as follows.
 4. **The core modeling equation is constrained floating-base dynamics.**
 
    $$
-   \mathbf{M}(\mathbf{q}) \dot{\mathbf{v}} + \mathbf{h}(\mathbf{q},\mathbf{v}) = \mathbf{S}^T \boldsymbol{\tau} + \mathbf{J}_c(\mathbf{q})^T \boldsymbol{\lambda},
+   M(q) \dot v + h(q,v) = S^T \boldsymbol{\tau} + J_c(q)^T \boldsymbol{\lambda},
    $$
 
    together with acceleration-level contact constraints.
 
 5. **Balance is a wrench-feasibility problem, not only a geometry problem.** The support polygon and ZMP are useful, but centroidal dynamics and contact wrench feasibility provide the more general viewpoint.
 
-6. **Estimation matters as much as control.** Incorrect contact assumptions can destabilize an otherwise correct controller.
+6. **Estimation matters as much as mechanics.** Incorrect contact assumptions can corrupt the state estimate and invalidate otherwise sensible planning logic.
 
 7. **Planning is often planning over contact modes.** Where and when the robot touches the world is as important as the trajectory it follows.
 
-8. **Whole-body control is the natural implementation framework.** It coordinates contact constraints, task objectives, torque limits, and force feasibility in one optimization problem.
+8. **Good implementation requires modeling the right uncertainties.** Friction variation, terrain geometry, contact timing, estimator semantics, and impact interpretation usually matter more than symbolic elegance.
 
-9. **Good implementation requires modeling the right uncertainties.** Actuator delays, friction variation, transition logic, and sensor semantics usually matter more than symbolic elegance.
+9. **Tactile sensing is a key frontier.** Hands, feet, and distributed body sensing can supply contact information that classical sparse sensors cannot.
 
-10. **The future lies in structured integration.** The strongest direction is not purely model-based or purely learned, but contact-aware systems that combine physics, optimization, sensing, and data-driven robustness.
+10. **A strong humanoid contact stack starts with structure.** Clear models, clear assumptions, and staged validation are more important than premature algorithmic complexity.
 
-# 12. Suggested implementation roadmap for students
+# 11. Suggested implementation roadmap for students
 
 A sensible semester project based on these notes would proceed in the following order.
 
@@ -1070,39 +807,39 @@ A sensible semester project based on these notes would proceed in the following 
 - Estimate stance versus swing.
 - Fuse IMU and kinematics using stance-foot constraints.
 
-## Stage 3: Reduced-order balance controller
+## Stage 3: Reduced-order balance analysis
 
-- Implement a CoM or LIPM-based controller.
+- Implement CoM, LIPM, or centroidal analyses for quiet standing and simple stepping.
 - Add ZMP or capture-point reasoning.
-- Test under pushes and friction variation.
+- Test under pushes, friction variation, and terrain changes.
 
-## Stage 4: Whole-body inverse dynamics
+## Stage 4: Contact planning
 
-- Solve for $(\dot{\mathbf{v}}, \boldsymbol{\tau}, \boldsymbol{\lambda})$ with one swing-foot task and posture regularization.
-- Add torque limits and a friction pyramid.
+- Build a footstep planner or simple contact-sequence planner.
+- Add a hand-support option for a stair or railing scenario.
+- Check kinematic reachability and centroidal wrench feasibility.
 
 ## Stage 5: Contact transitions
 
-- Implement touchdown detection and force ramping.
+- Implement touchdown detection and contact-state updates.
 - Evaluate robustness to timing errors and terrain height mismatch.
+- Diagnose estimator and planner behavior during liftoff and touchdown.
 
-## Stage 6: Multi-contact or loco-manipulation
+## Stage 6: Multi-contact reasoning or loco-manipulation setup
 
 - Add hand support, a door interaction, or stair climbing with a railing.
-- Compare pure model-based tracking against a learning-based residual or policy.
+- Compare a fixed contact schedule against a more adaptive planner.
+- Document where geometric feasibility, force feasibility, and sensing reliability become the limiting factors.
 
-# References for further study
+# 12. References for further study
 
 The following references are particularly useful for deeper study and implementation.
 
 1. Russ Tedrake, *Underactuated Robotics* (MIT course notes), especially the chapters on contact, multibody dynamics, and highly articulated legged robots.
 2. David E. Orin, Ambarish Goswami, and Sung-Hee Lee, “Centroidal dynamics of a humanoid robot,” *Autonomous Robots*, 2013.
-3. Siyuan Feng, Eric Whitman, X. Xinjilefu, and Christopher G. Atkeson, “Optimization-based full body control for the DARPA Robotics Challenge,” *Journal of Field Robotics*, 2015.
-4. Justin Carpentier and Nicolas Mansard and related work on whole-body inverse dynamics and constrained rigid-body control for humanoids.
-5. Justin Koenemann, Andrea Del Prete, Stéphane Caron, et al., “Whole-body model predictive control applied to the HRP-2 humanoid,” IROS 2015.
-6. Haiyang Dai, Andres Valenzuela, and Russ Tedrake, “Whole-body motion planning with centroidal dynamics and full kinematics,” Humanoids 2014.
-7. Yu-Chi Lin, Brahayam Ponton, Ludovic Righetti, and Dmitry Berenson, “Efficient humanoid contact planning using learned centroidal dynamics prediction,” 2018.
-8. Pietro Ferrari, Luca Rossini, Francesco Ruscelli, et al., “Multi-contact planning and control for humanoid robots,” *Robotics and Autonomous Systems*, 2023.
-9. Jean-Pierre Sleiman, Mayank Mittal, and Marco Hutter, “Guided reinforcement learning for robust multi-contact loco-manipulation,” CoRL 2024 / PMLR 2025.
-10. MuJoCo documentation, especially the sections on modeling and computation of frictional contact.
-11. Isaac Lab documentation, especially the sections on contact sensors and physics-based sensor abstractions.
+3. Haiyang Dai, Andres Valenzuela, and Russ Tedrake, “Whole-body motion planning with centroidal dynamics and full kinematics,” Humanoids 2014.
+4. Stéphane Caron and collaborators on friction cones, centroidal wrench cones, and contact geometry for legged and humanoid robots.
+5. Qiang Li, Oliver Kroemer, Zhe Su, Filipe Fernandes Veiga, Mohsen Kaboli, and Helge Ritter, “A Review of Tactile Information: Perception and Action Through Touch,” *IEEE Transactions on Robotics*, 2020.
+6. Zhaoyuan Gu, Junheng Li, Wenlan Shen, Wenhao Yu, Zhaoming Xie, Stephen McCrory, Xianyi Cheng, Abdulaziz Shamsah, Robert Griffin, C. Karen Liu, Abderrahmane Kheddar, Xue Bin Peng, Yuke Zhu, Guanya Shi, Quan Nguyen, Gordon Cheng, Huijun Gao, and Ye Zhao, “Humanoid Locomotion and Manipulation: Current Progress and Challenges in Control, Planning, and Learning,” 2025, especially the sections on tactile sensing and multi-contact planning.
+7. MuJoCo documentation, especially the sections on modeling and computation of frictional contact.
+8. Isaac Lab documentation, especially the sections on contact sensors and physics-based sensor abstractions.
