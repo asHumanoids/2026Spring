@@ -297,8 +297,7 @@ J_c & 0
 \dot v \\
 \lambda
 \end{bmatrix}
-=
-\begin{bmatrix}
+=\begin{bmatrix}
 S^T\tau - h \\
 -\dot J_c v
 \end{bmatrix}.
