@@ -16,8 +16,9 @@
 12. Suggested implementation roadmap for students
 13. References for further study
 
-
 # 1. Motivation and scope
+
+![alt text](image.png)
 
 ## 1.1 Why contact is central to humanoid robots
 
@@ -221,6 +222,8 @@ $$
 For a finite foot contact, the actual pressure distribution over the sole is distributed, but one often models its net effect as a resultant wrench subject to feasibility constraints. This viewpoint is crucial because humanoid feet can sustain not only vertical support forces but also moments due to distributed pressure over a finite support area.
 
 ## 3.5 Contact geometry: point, line, and surface contact
+
+![alt text](image-4.png)
 
 Contact geometry determines what wrenches can be supported.
 
@@ -457,6 +460,8 @@ The mistake is not teaching ZMP. The mistake is stopping there.
 
 # 6. Contact sensing, tactile information, and state estimation
 
+![alt text](image-3.png)
+
 ## 6.1 Why modeling alone is insufficient
 
 Rigid-body models never fully determine what is happening at the contact interface. Real contact is uncertain because of:
@@ -518,6 +523,8 @@ A robust humanoid estimator typically combines:
 A common engineering principle is to separate **contact detection**, **contact confidence**, and **contact use**. Binary logic alone is fragile. Confidence-weighted fusion is often far more stable.
 
 # 7. Planning with contact
+
+![alt text](image-1.png)
 
 ## 7.1 Why humanoid planning is contact planning
 
@@ -749,6 +756,8 @@ Rigid contact is a powerful abstraction, but many important behaviors involve co
 A major open challenge is how to incorporate compliant or deformable contact into real-time estimation and planning without making the model intractable.
 
 ## 9.5 Contact-implicit planning at humanoid scale
+
+![alt text](image-2.png)
 
 Contact-implicit planning is conceptually elegant, but full humanoid problems remain difficult because of high dimensionality, many candidate contact surfaces, and strongly nonconvex mode transitions.
 
