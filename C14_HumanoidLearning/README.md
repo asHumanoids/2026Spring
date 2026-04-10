@@ -214,32 +214,40 @@ A major design choice in humanoid learning is **what the policy outputs** and **
 Common action spaces include:
 
 1. **Torque actions**
-   $$
-   \mathbf{u}_t = \mathbf{a}_t \in \mathbb{R}^{n_u}.
-   $$
+
+$$
+\mathbf{u}_t = \mathbf{a}_t \in \mathbb{R}^{n_u}.
+$$
+   
    This is expressive but hard to train and fragile under sim-to-real mismatch.
 
-2. **Position-target actions**
-   $$
-   \mathbf{u}_t = \mathbf{K}_p(\mathbf{q}^{\star}_t - \mathbf{q}_t) - \mathbf{K}_d \dot{\mathbf{q}}_t,
-   \qquad \mathbf{q}^{\star}_t = \mathbf{a}_t.
-   $$
+3. **Position-target actions**
+
+$$
+\mathbf{u}_t = \mathbf{K}_p(\mathbf{q}^{\star}_t - \mathbf{q}_t) - \mathbf{K}_d \dot{\mathbf{q}}_t,
+\qquad \mathbf{q}^{\star}_t = \mathbf{a}_t.
+$$
+
    This is common in simulation because it regularizes the behavior through a low-level tracker.
 
-3. **Velocity-target actions**
+4. **Velocity-target actions**
    Useful for lower-level servo layers or reduced-order locomotion.
 
-4. **Residual actions**
-   $$
-   \mathbf{u}_t = \mathbf{u}^{\text{nom}}_t + \Delta \mathbf{u}_t,
-   \qquad \Delta \mathbf{u}_t = \pi_\theta(\mathbf{o}_t).
-   $$
+5. **Residual actions**
+
+$$
+\mathbf{u}_t = \mathbf{u}^{\text{nom}}_t + \Delta \mathbf{u}_t,
+\qquad \Delta \mathbf{u}_t = \pi_\theta(\mathbf{o}_t).
+$$
+
    This is important when a model-based or hand-designed controller already provides a stable baseline.
 
-5. **Latent skill actions**
-   $$
-   \mathbf{z}_t = \pi_\theta(\mathbf{o}_t),
-   $$
+6. **Latent skill actions**
+
+$$
+\mathbf{z}_t = \pi_\theta(\mathbf{o}_t),
+$$
+
    followed by a skill decoder or low-level motor controller.
 
 ## 4.2 Observation design
@@ -349,8 +357,7 @@ $$
 A reward may then penalize tracking error:
 
 $$
-r^{\text{track}}_t = \exp\!\left(-\|\mathbf{q}_t - \mathbf{q}^{\text{ref}}_t\|_{\mathbf{W}_q}^2
-- \|\dot{\mathbf{q}}_t - \dot{\mathbf{q}}^{\text{ref}}_t\|_{\mathbf{W}_{\dot q}}^2\right).
+r^{\text{track}}_t = \exp\!\left(-\|\mathbf{q}_t - \mathbf{q}^{\text{ref}}_t\|_{\mathbf{W}_q}^2 - \|\dot{\mathbf{q}}_t - \dot{\mathbf{q}}^{\text{ref}}_t\|_{\mathbf{W}_{\dot q}}^2\right).
 $$
 
 This can produce high-quality behaviors such as walking, running, jumping, dancing, and recovery maneuvers, provided the reference is dynamically meaningful and the policy retains enough freedom to adapt.
@@ -437,12 +444,7 @@ This is useful when expert actions are unavailable or when trajectory-level real
 For humanoids, imitation usually requires a retargeting stage from human demonstration to robot embodiment. Let $\mathbf{y}^{\text{human}}_t$ denote human features such as keypoints or joint angles, and let $\mathbf{q}^{\text{hum}}_t$ be humanoid joint coordinates. A generic retargeting objective is
 
 $$
-\min_{\mathbf{q}^{\text{hum}}_{0:T}}
-\sum_{t=0}^{T}
-\Big(
-\|\Phi(\mathbf{q}^{\text{hum}}_t) - \mathbf{y}^{\text{human}}_t\|_{\mathbf{W}_y}^2
-+ \|\mathbf{q}^{\text{hum}}_t - \mathbf{q}^{\text{hum}}_{t-1}\|_{\mathbf{W}_q}^2
-\Big)
+\min_{\mathbf{q}^{\text{hum}}_{0:T}} \sum_{t=0}^{T} \Big( \|\Phi(\mathbf{q}^{\text{hum}}_t) - \mathbf{y}^{\text{human}}_t\|_{\mathbf{W}_y}^2 + \|\mathbf{q}^{\text{hum}}_t - \mathbf{q}^{\text{hum}}_{t-1}\|_{\mathbf{W}_q}^2 \Big)
 $$
 
 subject to joint limits, balance-related constraints, collision avoidance, and sometimes contact consistency.
