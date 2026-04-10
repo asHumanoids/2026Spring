@@ -66,26 +66,30 @@ The notes do **not** attempt a full treatment of humanoid learning-based control
 ## 2.1 Configuration and generalized velocity
 
 Let the humanoid configuration be
+
 $$
 \mathbf{q} = \begin{bmatrix} \mathbf{q}_b \\ \mathbf{q}_a \end{bmatrix},
 $$
+
 where $\mathbf{q}_b$ denotes the floating-base pose and $\mathbf{q}_a \in \mathbb{R}^{n_a}$ denotes the actuated joint coordinates.
 
 The generalized velocity is
+
 $$
 \mathbf{v} = \begin{bmatrix} \mathbf{v}_b \\ \dot{\mathbf{q}}_a \end{bmatrix} \in \mathbb{R}^{n_v},
 $$
+
 where $\mathbf{v}_b \in \mathbb{R}^6$ is the spatial velocity of the base.
 
-For floating-base systems it is usually better to formulate dynamics in terms of $(\mathbf{q}, \mathbf{v})$ rather than $(\mathbf{q}, \dot{\mathbf{q}})$ because orientation coordinates are not always globally smooth or minimal.
+For floating-base systems, it is usually better to formulate dynamics in terms of $(\mathbf{q}, \mathbf{v})$ rather than $(\mathbf{q}, \dot{\mathbf{q}})$ because orientation coordinates are not always globally smooth or minimal.
 
 ## 2.2 Equations of motion
 
 The standard floating-base rigid-body dynamics under contact are
+
 $$
 \mathbf{M}(\mathbf{q}) \dot{\mathbf{v}} + \mathbf{h}(\mathbf{q}, \mathbf{v})
-=
-\mathbf{S}^\top \boldsymbol{\tau}
+=\mathbf{S}^\top \boldsymbol{\tau}
 +
 \mathbf{J}_c(\mathbf{q})^\top \boldsymbol{\lambda}.
 $$
@@ -107,20 +111,22 @@ captures underactuation: the base coordinates are not directly actuated.
 ## 2.3 Contact constraints
 
 If a contact frame is assumed to stick relative to the environment, then its velocity must vanish:
+
 $$
 \mathbf{J}_c(\mathbf{q}) \mathbf{v} = \mathbf{0}.
 $$
 
 Differentiating gives the acceleration-level constraint:
+
 $$
 \mathbf{J}_c(\mathbf{q}) \dot{\mathbf{v}}
 +
 \dot{\mathbf{J}}_c(\mathbf{q}, \mathbf{v}) \mathbf{v}
-=
-\mathbf{0}.
+=\mathbf{0}.
 $$
 
 Together with the equations of motion, this creates a constrained dynamics system in the unknown acceleration and contact force:
+
 $$
 \begin{bmatrix}
 \mathbf{M} & -\mathbf{J}_c^\top \\
@@ -130,8 +136,7 @@ $$
 \dot{\mathbf{v}} \\
 \boldsymbol{\lambda}
 \end{bmatrix}
-=
-\begin{bmatrix}
+=\begin{bmatrix}
 \mathbf{S}^\top \boldsymbol{\tau} - \mathbf{h} \\
 -\dot{\mathbf{J}}_c \mathbf{v}
 \end{bmatrix}.
@@ -148,10 +153,13 @@ A task variable $\mathbf{x}(\mathbf{q})$ may describe:
 - relative object pose.
 
 Its differential kinematics are
+
 $$
 \dot{\mathbf{x}} = \mathbf{J}_x(\mathbf{q}) \mathbf{v},
 $$
+
 and its acceleration is
+
 $$
 \ddot{\mathbf{x}} = \mathbf{J}_x(\mathbf{q}) \dot{\mathbf{v}} + \dot{\mathbf{J}}_x(\mathbf{q}, \mathbf{v}) \mathbf{v}.
 $$
@@ -161,6 +169,7 @@ These relations are the basic building blocks for task-space feedback and whole-
 ## 2.5 Centroidal quantities
 
 Let $\mathbf{c}$ be the CoM. The centroidal momentum is
+
 $$
 \mathbf{h}_G =
 \begin{bmatrix}
@@ -168,20 +177,25 @@ $$
 \mathbf{k}
 \end{bmatrix},
 $$
+
 where $\mathbf{l}$ is linear momentum and $\mathbf{k}$ is angular momentum about the CoM.
 
 The centroidal momentum matrix $\mathbf{A}_G(\mathbf{q})$ satisfies
+
 $$
 \mathbf{h}_G = \mathbf{A}_G(\mathbf{q}) \mathbf{v}.
 $$
 
 The centroidal dynamics are
+
 $$
 m \ddot{\mathbf{c}} = \sum_i \mathbf{f}_i + m \mathbf{g},
 $$
+
 $$
 \dot{\mathbf{k}} = \sum_i (\mathbf{p}_i - \mathbf{c}) \times \mathbf{f}_i + \sum_i \boldsymbol{\mu}_i,
 $$
+
 where $(\mathbf{p}_i, \mathbf{f}_i, \boldsymbol{\mu}_i)$ denote the location, force, and moment of contact $i$.
 
 These equations are central because they reduce full-body behavior to the net effect of contact wrenches on global motion.
@@ -245,6 +259,7 @@ The current literature strongly favors predictive-reactive hierarchies, especial
 For a fixed-base manipulator, inverse dynamics can in principle produce any sufficiently smooth acceleration trajectory that is dynamically feasible and within torque limits. For a humanoid, this is not true because the base is unactuated. The robot cannot directly impose arbitrary global accelerations. Without contact, the generalized actuation lies in a lower-dimensional subspace.
 
 A clean way to see this is to partition the dynamics into base and actuated rows:
+
 $$
 \begin{aligned}
 \mathbf{M}_b(\mathbf{q}) \dot{\mathbf{v}} + \mathbf{h}_b(\mathbf{q}, \mathbf{v})
@@ -259,6 +274,7 @@ The base equation contains no direct torque input. Global motion is shaped throu
 ## 4.2 Contact-consistent motion
 
 Suppose both feet are flat on the ground. Then a desired acceleration must satisfy the contact constraints:
+
 $$
 \mathbf{J}_c \dot{\mathbf{v}} + \dot{\mathbf{J}}_c \mathbf{v} = \mathbf{0}.
 $$
@@ -306,29 +322,30 @@ Joint-space control is often too indirect for humanoids. A humanoid should regul
 Task-space control expresses desired behavior directly in these variables.
 
 Let a task error be
+
 $$
 \mathbf{e}_x = \mathbf{x} - \mathbf{x}_d,
 $$
+
 with a desired second-order servo law
+
 $$
 \ddot{\mathbf{x}}^\star
-=
-\ddot{\mathbf{x}}_d
-- \mathbf{K}_d \dot{\mathbf{e}}_x
-- \mathbf{K}_p \mathbf{e}_x.
+=\ddot{\mathbf{x}}_d - \mathbf{K}_d \dot{\mathbf{e}}_x - \mathbf{K}_p \mathbf{e}_x.
 $$
 
 Using
+
 $$
 \ddot{\mathbf{x}}
-=
-\mathbf{J}_x \dot{\mathbf{v}} + \dot{\mathbf{J}}_x \mathbf{v},
+=\mathbf{J}_x \dot{\mathbf{v}} + \dot{\mathbf{J}}_x \mathbf{v},
 $$
+
 the controller can impose
+
 $$
 \mathbf{J}_x \dot{\mathbf{v}}
-=
-\ddot{\mathbf{x}}^\star - \dot{\mathbf{J}}_x \mathbf{v}.
+=\ddot{\mathbf{x}}^\star - \dot{\mathbf{J}}_x \mathbf{v}.
 $$
 
 This linear form is especially useful in optimization-based WBC.
@@ -340,9 +357,11 @@ Operational-space control asks a conceptually important question:
 > What is the dynamic behavior of the robot as seen from a task coordinate rather than from its joints?
 
 For fixed-base manipulators, the classic operational-space formulation introduces the task-space inertia
+
 $$
 \boldsymbol{\Lambda}_x = \left( \mathbf{J}_x \mathbf{M}^{-1} \mathbf{J}_x^\top \right)^{-1},
 $$
+
 under suitable rank assumptions. This quantity tells us how difficult it is to accelerate the task in a given direction.
 
 For humanoids under contact, an analogous idea still matters conceptually, but the presence of a floating base and contact constraints means the effective task dynamics depend on the constrained system. In practice, most humanoid systems use the operational-space intuition while implementing it through inverse dynamics or optimization rather than through closed-form decoupling.
@@ -392,12 +411,15 @@ The linear inverted pendulum model (LIPM) assumes:
 - point-foot or equivalent flat-ground support simplification.
 
 In one horizontal direction,
+
 $$
 \ddot{x} = \omega^2 (x - x_Z), \qquad \omega = \sqrt{\frac{g}{z_c}},
 $$
+
 where $x$ is the CoM coordinate and $x_Z$ is the ZMP coordinate.
 
 This model is attractive because it is linear and exposes the unstable component of CoM motion. It supports elegant concepts such as the capture point:
+
 $$
 \xi = x + \frac{\dot{x}}{\omega}.
 $$
@@ -419,9 +441,11 @@ Therefore it is best taught as a conceptual baseline rather than as a final huma
 ## 6.4 Centroidal dynamics as a richer reduced model
 
 Centroidal dynamics keep the physically important global quantities:
+
 $$
 m \ddot{\mathbf{c}} = \sum_i \mathbf{f}_i + m \mathbf{g},
 $$
+
 $$
 \dot{\mathbf{k}} = \sum_i (\mathbf{p}_i - \mathbf{c}) \times \mathbf{f}_i + \sum_i \boldsymbol{\mu}_i.
 $$
@@ -446,11 +470,10 @@ This perspective connects reduced-order planning directly to whole-body realizat
 ## 6.6 Momentum regulation
 
 A common centroidal control idea is to regulate momentum:
+
 $$
 \dot{\mathbf{h}}_G^\star
-=
-- \mathbf{K}_h (\mathbf{h}_G - \mathbf{h}_{G,d})
-+ \dot{\mathbf{h}}_{G,d}.
+= - \mathbf{K}_h (\mathbf{h}_G - \mathbf{h}_{G,d}) + \dot{\mathbf{h}}_{G,d}.
 $$
 
 Given this desired momentum rate, one solves for contact forces or a net wrench that realizes it. Then the full-body controller maps those force objectives into consistent joint torques and accelerations.
@@ -495,19 +518,25 @@ $$
 +
 \left\| \mathbf{W}_{\lambda} \boldsymbol{\lambda} \right\|^2
 $$
+
 subject to
+
 $$
 \mathbf{M} \dot{\mathbf{v}} + \mathbf{h} = \mathbf{S}^\top \boldsymbol{\tau} + \mathbf{J}_c^\top \boldsymbol{\lambda},
 $$
+
 $$
 \mathbf{J}_c \dot{\mathbf{v}} + \dot{\mathbf{J}}_c \mathbf{v} = \mathbf{0},
 $$
+
 $$
 \mathbf{A}_{\lambda} \boldsymbol{\lambda} \le \mathbf{b}_{\lambda},
 $$
+
 $$
 \boldsymbol{\tau}_{\min} \le \boldsymbol{\tau} \le \boldsymbol{\tau}_{\max},
 $$
+
 $$
 \dot{\mathbf{v}}_{\min} \le \dot{\mathbf{v}} \le \dot{\mathbf{v}}_{\max}.
 $$
@@ -530,35 +559,38 @@ The matrix $\mathbf{M}$ is the full generalized inertia matrix, $\mathbf{h}$ col
 ### Task terms in the objective
 
 The term
+
 $$
 \left\| \mathbf{W}_j \left(\mathbf{J}_j \dot{\mathbf{v}} - \mathbf{b}_j \right) \right\|^2
 $$
+
 represents task $j$.
 
 Each task defines a desired relation at the acceleration level. The matrix $\mathbf{J}_j$ is the Jacobian associated with that task, and $\mathbf{b}_j$ is the desired task-space acceleration after compensating for known kinematic terms. The controller tries to choose $\dot{\mathbf{v}}$ so that the realized task acceleration $\mathbf{J}_j \dot{\mathbf{v}}$ is close to the desired one.
 
 A common construction is
+
 $$
 \mathbf{J}_j \dot{\mathbf{v}} + \dot{\mathbf{J}}_j \mathbf{v} = \ddot{\mathbf{x}}_j,
 $$
+
 where $\mathbf{x}_j$ is the task variable, such as center-of-mass position, torso orientation, hand pose, or swing-foot pose. If a desired task acceleration $\ddot{\mathbf{x}}_j^\star$ is specified, then the acceleration matching condition becomes
+
 $$
 \mathbf{J}_j \dot{\mathbf{v}} \approx \ddot{\mathbf{x}}_j^\star - \dot{\mathbf{J}}_j \mathbf{v}.
 $$
+
 Thus one usually sets
+
 $$
 \mathbf{b}_j = \ddot{\mathbf{x}}_j^\star - \dot{\mathbf{J}}_j \mathbf{v}.
 $$
 
 A standard choice for $\ddot{\mathbf{x}}_j^\star$ is a PD-type feedback law in task space:
+
 $$
 \ddot{\mathbf{x}}_j^\star
-=
-\ddot{\mathbf{x}}_{j,\mathrm{ref}}
-+
-\mathbf{K}_{d,j} \big(\dot{\mathbf{x}}_{j,\mathrm{ref}} - \dot{\mathbf{x}}_j\big)
-+
-\mathbf{K}_{p,j} \big(\mathbf{x}_{j,\mathrm{ref}} - \mathbf{x}_j\big).
+= \ddot{\mathbf{x}}_{j,\mathrm{ref}} + \mathbf{K}_{d,j} \big(\dot{\mathbf{x}}_{j,\mathrm{ref}} - \dot{\mathbf{x}}_j\big) + \mathbf{K}_{p,j} \big(\mathbf{x}_{j,\mathrm{ref}} - \mathbf{x}_j\big).
 $$
 
 This means that the optimization is not directly tracking position or velocity; rather, it is tracking a desired task acceleration generated from motion errors.
@@ -579,11 +611,13 @@ The weighting matrix $\mathbf{W}_j$ determines how strongly task $j$ influences 
 ### Torque and contact regularization
 
 The terms
+
 $$
 \left\| \mathbf{W}_{\tau} \boldsymbol{\tau} \right\|^2
 \qquad \text{and} \qquad
 \left\| \mathbf{W}_{\lambda} \boldsymbol{\lambda} \right\|^2
 $$
+
 are regularization terms.
 
 They do not usually represent primary control objectives. Their role is to bias the solution toward numerically well-behaved, physically reasonable actuation and contact force distributions.
@@ -599,9 +633,11 @@ In some implementations, the regularization on $\boldsymbol{\lambda}$ is replace
 ### Dynamic feasibility constraint
 
 The equation
+
 $$
 \mathbf{M} \dot{\mathbf{v}} + \mathbf{h} = \mathbf{S}^\top \boldsymbol{\tau} + \mathbf{J}_c^\top \boldsymbol{\lambda}
 $$
+
 is the rigid-body dynamics of the floating-base humanoid.
 
 This is the main physical consistency constraint in the problem. It states that the generalized inertial and bias forces must be balanced by actuator torques and contact forces.
@@ -615,9 +651,11 @@ For humanoids, this constraint is essential because the base is not directly act
 ### Contact-consistency constraint
 
 The equality
+
 $$
 \mathbf{J}_c \dot{\mathbf{v}} + \dot{\mathbf{J}}_c \mathbf{v} = \mathbf{0}
 $$
+
 enforces rigid sticking contact.
 
 If a foot is assumed firmly planted on the ground, then its contact point should have zero acceleration relative to the environment. This equation is simply the acceleration-level version of that assumption.
@@ -635,9 +673,11 @@ When contacts change, such as during walking, the set of active constraints chan
 ### Contact-force inequalities
 
 The inequality
+
 $$
 \mathbf{A}_{\lambda} \boldsymbol{\lambda} \le \mathbf{b}_{\lambda}
 $$
+
 collects contact-force feasibility constraints.
 
 These constraints typically encode:
@@ -648,11 +688,13 @@ These constraints typically encode:
 - contact wrench limits.
 
 For a simple point contact with linearized friction, one may impose
+
 $$
 \lambda_n \ge 0, \qquad
 |\lambda_t^{(x)}| \le \mu \lambda_n, \qquad
 |\lambda_t^{(y)}| \le \mu \lambda_n.
 $$
+
 For flat-foot contact, the constraints are often written at the wrench level, for example bounding the center of pressure inside the foot sole and limiting yaw torque about the contact normal.
 
 These inequalities are essential because a dynamics equation can always be balanced by mathematically convenient but physically impossible contact forces. The friction and wrench constraints prevent the optimizer from using such unrealizable support forces.
@@ -662,15 +704,19 @@ These inequalities are essential because a dynamics equation can always be balan
 ### Torque and acceleration bounds
 
 The bounds
+
 $$
 \boldsymbol{\tau}_{\min} \le \boldsymbol{\tau} \le \boldsymbol{\tau}_{\max}
 $$
+
 reflect motor limits. They encode what the actuators can really produce.
 
 The bounds
+
 $$
 \dot{\mathbf{v}}_{\min} \le \dot{\mathbf{v}} \le \dot{\mathbf{v}}_{\max}
 $$
+
 are sometimes used for numerical conditioning, safety, or conservative dynamic feasibility. They can help prevent unrealistically large accelerations that may arise from tracking conflicts or poorly tuned weights.
 
 In some implementations, these acceleration bounds are replaced or augmented by joint-acceleration limits, jerk limits, or velocity-dependent saturation rules.
@@ -680,6 +726,7 @@ In some implementations, these acceleration bounds are replaced or augmented by 
 ### Why this becomes a quadratic program
 
 If all task costs are quadratic and all constraints are linear in the optimization variables, then the WBC problem is a quadratic program:
+
 $$
 \min_{\mathbf{z}} \quad \frac{1}{2}\mathbf{z}^\top \mathbf{H}\mathbf{z} + \mathbf{g}^\top \mathbf{z}
 \quad
@@ -688,7 +735,9 @@ $$
 \mathbf{C}\mathbf{z} = \mathbf{d}, \qquad
 \mathbf{E}\mathbf{z} \le \mathbf{f},
 $$
+
 with
+
 $$
 \mathbf{z} =
 \begin{bmatrix}
@@ -838,6 +887,7 @@ Compliance introduces a controlled relation between motion error and interaction
 ## 8.2 Task-space impedance control
 
 A standard impedance law in task space is
+
 $$
 \mathbf{F}_d =
 \mathbf{K}_p (\mathbf{x}_d - \mathbf{x})
@@ -856,10 +906,9 @@ The robot is made to behave like a mass-spring-damper in the task coordinates. I
 ## 8.3 Admittance control
 
 Admittance is dual to impedance. Instead of mapping motion error to force, it maps measured force to commanded motion. A simple form is
+
 $$
-\mathbf{M}_a \ddot{\mathbf{x}} + \mathbf{D}_a \dot{\mathbf{x}} + \mathbf{K}_a (\mathbf{x} - \mathbf{x}_0)
-=
-\mathbf{F}_{\mathrm{ext}}.
+\mathbf{M}_a \ddot{\mathbf{x}} + \mathbf{D}_a \dot{\mathbf{x}} + \mathbf{K}_a (\mathbf{x} - \mathbf{x}_0) = \mathbf{F}_{\mathrm{ext}}.
 $$
 
 Admittance is useful when:
@@ -912,13 +961,17 @@ $$
 +
 \ell_f(\mathbf{x}(t_0+T))
 $$
+
 subject to
+
 $$
 \dot{\mathbf{x}} = \mathbf{f}(\mathbf{x}, \mathbf{u}, \boldsymbol{\lambda}),
 $$
+
 $$
 \mathbf{h}(\mathbf{x}, \mathbf{u}, \boldsymbol{\lambda}) = \mathbf{0},
 $$
+
 $$
 \mathbf{g}(\mathbf{x}, \mathbf{u}, \boldsymbol{\lambda}) \le \mathbf{0}.
 $$
@@ -932,9 +985,11 @@ This compact expression is intentionally broad. It can represent many forms of h
 The optimization is performed over entire trajectories on the interval $[t_0, t_0+T]$, not just over values at a single instant.
 
 The state trajectory
+
 $$
 \mathbf{x}(\cdot)
 $$
+
 represents the predicted evolution of the robot state. Depending on the model, $\mathbf{x}$ may include:
 - center-of-mass position and velocity,
 - linear and angular momentum,
@@ -944,9 +999,11 @@ represents the predicted evolution of the robot state. Depending on the model, $
 - object states if the robot is manipulating a load.
 
 The control trajectory
+
 $$
 \mathbf{u}(\cdot)
 $$
+
 contains the commanded inputs. Depending on the control architecture, these may be:
 - joint torques,
 - desired contact wrenches,
@@ -955,9 +1012,11 @@ contains the commanded inputs. Depending on the control architecture, these may 
 - reduced-order control inputs such as center-of-pressure or virtual forces.
 
 The contact-force trajectory
+
 $$
 \boldsymbol{\lambda}(\cdot)
 $$
+
 represents the contact reactions with the environment. In some formulations this is an explicit optimization variable, while in others it is eliminated implicitly or does not appear because the chosen model has already reduced the contact mechanics into a simpler control input.
 
 For humanoids, including $\boldsymbol{\lambda}$ explicitly is often useful because balancing, walking, and loco-manipulation are strongly shaped by the feasibility of ground reaction forces and other contact wrenches.
@@ -991,24 +1050,18 @@ The running cost often contains terms such as:
 - violation penalties for soft constraints.
 
 A typical quadratic running cost might look like
+
 $$
 \ell(\mathbf{x}, \mathbf{u}, \boldsymbol{\lambda})
-=
-(\mathbf{x}-\mathbf{x}_{\mathrm{ref}})^\top \mathbf{Q} (\mathbf{x}-\mathbf{x}_{\mathrm{ref}})
-+
-\mathbf{u}^\top \mathbf{R} \mathbf{u}
-+
-\boldsymbol{\lambda}^\top \mathbf{W}_{\lambda} \boldsymbol{\lambda}.
+= (\mathbf{x}-\mathbf{x}_{\mathrm{ref}})^\top \mathbf{Q} (\mathbf{x}-\mathbf{x}_{\mathrm{ref}}) + \mathbf{u}^\top \mathbf{R} \mathbf{u} + \boldsymbol{\lambda}^\top \mathbf{W}_{\lambda} \boldsymbol{\lambda}.
 $$
 
 The terminal cost is often chosen as
+
 $$
-\ell_f(\mathbf{x}(t_0+T))
-=
-(\mathbf{x}(t_0+T)-\mathbf{x}_{\mathrm{ref},f})^\top
-\mathbf{Q}_f
-(\mathbf{x}(t_0+T)-\mathbf{x}_{\mathrm{ref},f}),
+\ell_f(\mathbf{x}(t_0+T)) = (\mathbf{x}(t_0+T)-\mathbf{x}_{\mathrm{ref},f})^\top \mathbf{Q}_f (\mathbf{x}(t_0+T)-\mathbf{x}_{\mathrm{ref},f}),
 $$
+
 which encourages the state at the end of the horizon to point toward a desirable future continuation. This is especially important because the horizon is finite: without a terminal cost or terminal condition, the optimizer may behave myopically and choose short-term actions that look favorable now but are poor for long-term stability.
 
 ---
@@ -1016,9 +1069,11 @@ which encourages the state at the end of the horizon to point toward a desirable
 ### Dynamics constraint
 
 The constraint
+
 $$
 \dot{\mathbf{x}} = \mathbf{f}(\mathbf{x}, \mathbf{u}, \boldsymbol{\lambda})
 $$
+
 encodes the predictive model.
 
 This is the heart of MPC. The optimizer is not free to choose arbitrary future trajectories; every predicted state must be dynamically reachable from the current condition under the chosen inputs and contact forces.
@@ -1050,9 +1105,11 @@ The model $\mathbf{f}$ therefore reflects a design tradeoff between fidelity and
 ### Equality constraints
 
 The equality constraint
+
 $$
 \mathbf{h}(\mathbf{x}, \mathbf{u}, \boldsymbol{\lambda}) = \mathbf{0}
 $$
+
 collects all exact algebraic relations that must hold.
 
 Depending on the formulation, these may include:
@@ -1072,9 +1129,11 @@ Equality constraints are typically used when a condition must be satisfied exact
 ### Inequality constraints
 
 The inequality constraint
+
 $$
 \mathbf{g}(\mathbf{x}, \mathbf{u}, \boldsymbol{\lambda}) \le \mathbf{0}
 $$
+
 collects all physical, safety, and feasibility limits.
 
 Typical examples include:
@@ -1135,28 +1194,35 @@ For humanoids, this is especially important because contact transitions, externa
 ### Discretization and numerical form
 
 To solve the problem numerically, the continuous-time trajectories are discretized over $N$ stages with time step $\Delta t$, so that
+
 $$
 T = N \Delta t.
 $$
 
 The state, control, and contact trajectories become sequences:
+
 $$
 \mathbf{x}_0, \mathbf{x}_1, \dots, \mathbf{x}_N,
 $$
+
 $$
 \mathbf{u}_0, \mathbf{u}_1, \dots, \mathbf{u}_{N-1},
 $$
+
 $$
 \boldsymbol{\lambda}_0, \boldsymbol{\lambda}_1, \dots, \boldsymbol{\lambda}_{N-1}.
 $$
 
 A common discrete-time approximation is
+
 $$
 \mathbf{x}_{k+1} = \mathbf{f}_d(\mathbf{x}_k, \mathbf{u}_k, \boldsymbol{\lambda}_k),
 $$
+
 where $\mathbf{f}_d$ is obtained from Euler integration, Runge--Kutta integration, collocation, or another discretization scheme.
 
 The continuous problem then becomes a finite-dimensional optimization problem:
+
 $$
 \min_{\{\mathbf{x}_k,\mathbf{u}_k,\boldsymbol{\lambda}_k\}}
 \sum_{k=0}^{N-1}
@@ -1164,16 +1230,21 @@ $$
 +
 \ell_f(\mathbf{x}_N)
 $$
+
 subject to
+
 $$
 \mathbf{x}_{k+1} = \mathbf{f}_d(\mathbf{x}_k, \mathbf{u}_k, \boldsymbol{\lambda}_k),
 $$
+
 $$
 \mathbf{h}_d(\mathbf{x}_k, \mathbf{u}_k, \boldsymbol{\lambda}_k)=\mathbf{0},
 $$
+
 $$
 \mathbf{g}_d(\mathbf{x}_k, \mathbf{u}_k, \boldsymbol{\lambda}_k) \le \mathbf{0},
 $$
+
 for $k=0,\dots,N-1$.
 
 If the model is linear and the costs are quadratic, the result is typically a **quadratic program (QP)**. If the model or constraints are nonlinear, the result becomes a **nonlinear program (NLP)**. This is why humanoid MPC spans a broad family of solvers, from fast linear MPC QPs to nonlinear trajectory optimization.
@@ -1183,10 +1254,13 @@ If the model is linear and the costs are quadratic, the result is typically a **
 ### Linear MPC as a special case
 
 If the dynamics are linearized as
+
 $$
 \mathbf{x}_{k+1} = \mathbf{A}_k \mathbf{x}_k + \mathbf{B}_k \mathbf{u}_k + \mathbf{D}_k \boldsymbol{\lambda}_k + \mathbf{d}_k,
 $$
+
 and the cost is quadratic, then the optimization becomes
+
 $$
 \min
 \sum_{k=0}^{N-1}
