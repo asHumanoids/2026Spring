@@ -103,9 +103,11 @@ Here:
 - $\boldsymbol{\lambda}$ parameterizes the contact force or contact wrench variables.
 
 The actuation matrix
+
 $$
 \mathbf{S} = \begin{bmatrix} \mathbf{0}_{n_a \times 6} & \mathbf{I}_{n_a} \end{bmatrix}
 $$
+
 captures underactuation: the base coordinates are not directly actuated.
 
 ## 2.3 Contact constraints
