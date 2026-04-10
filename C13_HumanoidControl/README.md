@@ -486,6 +486,8 @@ This makes momentum a bridge between balance and full-body motion.
 
 # 7. Whole-body control
 
+![alt text](image-1.png)
+
 ## 7.1 What whole-body control tries to do
 
 Whole-body control (WBC) coordinates the full robot under constraints. A typical WBC simultaneously handles:
@@ -939,6 +941,8 @@ This is especially important in human-facing or poorly modeled environments.
 ---
 
 # 9. Model predictive control for humanoids
+
+![alt text](image.png)
 
 ## 9.1 Why MPC is attractive
 
@@ -1410,6 +1414,8 @@ These outputs are rarely sent directly to motors. They are usually consumed by a
 ---
 
 # 10. Control of locomotion, manipulation, and loco-manipulation
+
+![alt text](image-2.png)
 
 ## 10.1 Locomotion control
 
