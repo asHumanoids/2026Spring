@@ -40,11 +40,11 @@ Core literatures related to this course are as the following:
 
 ## Module 01: Robot Description Basics
 
-### Class 01 on Mar 02 (Mon): Perspectives in Understanding Robots
+### Class 01 on Mar 02 (Mon): [Perspectives in Understanding Robots](https://github.com/asHumanoids/2026Spring/tree/main/C01_RobotPerspectives)
 
-### Class 02 on Mar 04 (Wed): The Need for Robot Description
+### Class 02 on Mar 04 (Wed): [The Need for Robot Description](https://github.com/asHumanoids/2026Spring/tree/main/C02_RobotDescription)
 
-### Class 03 on Mar 06 (Fri): MuJoCo for Robots
+### Class 03 on Mar 06 (Fri): [MuJoCo for Robots](https://github.com/asHumanoids/2026Spring/tree/main/C03_MuJoCo)
 
 ## Module 02 Simulation & Interaction with Humanoids
 
@@ -66,11 +66,11 @@ Core literatures related to this course are as the following:
 
 ### Class 11 on Apr 08 (Wed): [Humanoid Movement](https://github.com/asHumanoids/2026Spring/tree/main/C11_HumanoidMovement)
 
-### Class 12 on Apr 10 (Fri): Humanoid Contact
+### Class 12 on Apr 10 (Fri): [Humanoid Contact](https://github.com/asHumanoids/2026Spring/tree/main/C12_HumanoidContact)
 
-### Class 13 on Apr 13 (Mon): Humanoid Control
+### Class 13 on Apr 13 (Mon): [Humanoid Control](https://github.com/asHumanoids/2026Spring/tree/main/C13_HumanoidControl)
 
-### Class 14 on Apr 15 (Wed): Humanoid Learning
+### Class 14 on Apr 15 (Wed): [Humanoid Learning](https://github.com/asHumanoids/2026Spring/tree/main/C14_HumanoidLearning)
 
 ## Module 04 Final Project on Humanoid Robots
 
