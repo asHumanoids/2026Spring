@@ -161,14 +161,14 @@ This is an individual project:
 
 2. **Conduct an interactive final presentation on Apr 24 in-class**: this will be used to replace the original final project (30%) in the syllabus
     - Each student will need to conduct a 5-min in-class presentation of your final project.
-        - Following the university recommendation, you are required to present it online, live, and interactive. You must turn on your camera. You must show interaction during the class.
-        - You are encouraged to prepare a 5-min presentation recording in advance (only as a backup) and upload before Apr 23 noon.
+        - Following the university recommendation, you are required to present it online, live, and interactively. You must turn on your camera. You must engage in interaction during class.
+        - You are encouraged to prepare a 5-min presentation recording in advance (only as a backup) and upload before Apr 23 at noon.
         - Be sure to test your audio and screensharing and finish your online presentation within 5 min. 
 
     - **Email Title: [ROB803] StudentID - FirstName LastName - FinalPresentation**
         - To: chaoyang.song@mbzuai.ac.ae 
         - Cc: haoran.sun@mbzuai.ac.ae; zishang.zhang@mbzuai.ac.ae; guangyi.huang@mbzuai.ac.ae
-        - Zip Filename Example (same as Email Title): [ROB] 12345678 - Jan Doe - FinalPresentation.zip
+        - Zip Filename Example (same as Email Title): [ROB803] 12345678 - Jan Doe - FinalPresentation.zip
         - Folder Structure When Unzipped:
         <pre>
         [ROB803] 12345678 - Jan Doe - FinalPresentation
@@ -179,11 +179,11 @@ This is an individual project:
 
 ## Selected Research in the Design & Learning Research Group (Remotely) Related to Humanoid Robotics
 
-- **asMagic**: an iOS app we developed since 2025 transforming iOS devices into a full-stack data collection and interaction system for embodied intelligence. Two early preview versions of the app independently developed by Tianyu Wu won the Apple's Swift Student Challenge in 2025 (Top 250) and 2026 (Top 50). 
+- **asMagic**: an iOS app we developed since 2025, transforming iOS devices into a full-stack data collection and interaction system for embodied intelligence. Two early preview versions of the app, independently developed by Tianyu Wu, won Apple's Swift Student Challenge in 2025 (Top 250) and 2026 (Top 50). 
     - https://apps.apple.com/us/app/asmagic/id6661033548
-- **asRoBallet**: The closest robot system we developed to a humanoid robot. THis is a humanoid ballbot prototype we developed by repurposing original components from our asOverDog robot system with updated structural parts. It is probably the first *end-to-end* RL locomotion policy deployed on a humanoid ballbot hardware platform. 
+- **asRoBallet**: The closest robot system we developed to a humanoid robot. This is a humanoid ballbot prototype we developed by repurposing original components from our asOverDog robot system with updated structural parts. It is probably the first *end-to-end* RL locomotion policy deployed on a humanoid ballbot hardware platform. 
     - arXiv link to be updated
-- **asOverDog**: An novel platform for quadrupedal locomotion adopting the generalized overconstrained linkages reconfigurable into Bennett linkage, planar linkage, and spherical linkage as the robotic limbs for learning-based fundamental research in robophysical intelligence.
+- **asOverDog**: A novel platform for quadrupedal locomotion adopting the generalized overconstrained linkages reconfigurable into Bennett linkage, planar linkage, and spherical linkage as the robotic limbs for learning-based fundamental research in robophysical intelligence.
     - Under Reviewe @ IJRR: https://bionicdl.ancorasir.com/?p=2233
     - FundRes2025: https://bionicdl.ancorasir.com/?p=1668
     - ISRR2024 (Collection of Best Papers Presented): https://bionicdl.ancorasir.com/?p=1669
@@ -192,7 +192,7 @@ This is an individual project:
     - MMT2022: https://bionicdl.ancorasir.com/?p=1432
     - ICRA2021: https://bionicdl.ancorasir.com/?p=1714
 - **asMagiClaw**: A dual-purpose device for collecting human demonstration data during object manipulation, integrated with our latest research in 
-    - Opensource Documentation: https://doc.ancoraspring.com/asmagiclaw
+    - Open-source Documentation: https://doc.ancoraspring.com/asmagiclaw
     - Working Paper: https://bionicdl.ancorasir.com/?p=1658
     - CoRL2025 (Workshop): https://bionicdl.ancorasir.com/?p=2162
     - IROS2024 (Workshop): https://bionicdl.ancorasir.com/?p=1982
