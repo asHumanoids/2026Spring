@@ -111,7 +111,7 @@ This is an individual assignment:
         ├── 12345678 - Jan Doe - Assignment.md
         ├── 12345678 - Jan Doe - Assignment.pdf
         ├── 12345678 - Jan Doe - Assignment.mp4
-        ├── 12345678 - Jan Doe - Assignment - SourceCode
+        └── 12345678 - Jan Doe - Assignment - SourceCode
             ├── ...
             └── ...
         </pre>
@@ -130,11 +130,12 @@ This is an individual project:
 
 1. **Submit a final report before Apr 27 noon**: this will be used to replace the original final exam (19%) in the syllabus
     - Each student needs to submit a report of no more than 4 pages long (excluding references) using the format of ICRA to document their final project, with a tentative to-do list toward potential deployment on a humanoid hardware. It should contain the following content:
-        - provide a descriptive content with literature reference to justify the problem,
+        - provide descriptive content with literature references to justify the problem,
         - mathematically formulate the problem and any related derivation,
         - include pseudo-code explaining your solution pipeline 
         - explain the data you have collected, and
-        - include analysis of your final results obtained.
+        - include analysis of your final results obtained,
+        - (Updated) include all reproducible source code as a zip with a README.MD of instructions to run it.
 
     - **Email Title: [ROB803] StudentID - FirstName LastName - FinalReport**
         - To: chaoyang.song@mbzuai.ac.ae 
@@ -151,9 +152,12 @@ This is an individual project:
                 ├── fig1.png
                 ├── fig1.png
                 └── ...
-        └── 12345678 - Jan Doe - FinalReport - SupplementaryVideo
+        ├── 12345678 - Jan Doe - FinalReport - SupplementaryVideo
             ├── Vid1.mp4
             ├── Vid2.mp4
+            └── ...
+        └── 12345678 - Jan Doe - FinalReport - SourceCode
+            ├── README.MD
             └── ...
         </pre>
 
