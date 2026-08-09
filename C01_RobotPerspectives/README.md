@@ -1,5 +1,9 @@
 # Class 01 on Perspectives in Understanding Robots
 
+[▶ Open the full-screen slide presentation](https://ashumanoids.github.io/2026Spring/)
+
+Use the arrow keys or swipe to navigate. Press `f` for full screen, `o` for the slide overview, and `p` for presenter view.
+
 ## Understanding Robot as a Machine, a Graph, and a Manifold
 
 To better understand a robot, let's begin with a three-level framework:
