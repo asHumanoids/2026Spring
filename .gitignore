@@ -1,2 +1,4 @@
-03-FM-01-VLA/BEHAVIOR-1K/
-03-FM-01-VLA/Isaac-GR00T/
+.site-docs/
+_site/
+_rendered/
+.venv-docs/

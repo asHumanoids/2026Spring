@@ -1,6 +1,6 @@
 # Class 01 on Perspectives in Understanding Robots
 
-[▶ Open the full-screen slide presentation](https://ashumanoids.github.io/2026Spring/)
+[▶ Open the full-screen slide presentation](https://ashumanoids.github.io/2026Spring/slides/robot-perspectives/)
 
 Use the arrow keys or swipe to navigate. Press `f` for full screen, `o` for the slide overview, and `p` for presenter view.
 

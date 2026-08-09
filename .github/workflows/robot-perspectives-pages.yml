@@ -1,13 +1,9 @@
-name: Deploy Robot Perspectives slides
+name: Deploy 2026Spring course site
 
 on:
   push:
     branches:
       - main
-    paths:
-      - C01_RobotPerspectives/slides.md
-      - C01_RobotPerspectives/images/**
-      - .github/workflows/robot-perspectives-pages.yml
   workflow_dispatch:
 
 permissions:
@@ -29,17 +25,30 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-docs.txt
+
+      - name: Install course site dependencies
+        run: python -m pip install --disable-pip-version-check -r requirements-docs.txt
+
+      - name: Prepare course content
+        run: python scripts/prepare_site.py
+
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
 
-      - name: Build Marp presentation
+      - name: Build Robot Perspectives presentation
         run: |
-          mkdir -p _site/images _rendered
+          mkdir -p .site-docs/slides/robot-perspectives/images _rendered
           npx --yes @marp-team/marp-cli@4.5.0 \
             C01_RobotPerspectives/slides.md \
-            --output _site/index.html \
+            --output .site-docs/slides/robot-perspectives/index.html \
             --html \
             --bespoke.progress
           npx --yes @marp-team/marp-cli@4.5.0 \
@@ -50,11 +59,18 @@ jobs:
             --allow-local-files
           for index in {1..47}; do
             printf -v rendered "_rendered/slide.%03d.png" "$index"
-            target="_site/images/Keynote-Week01-1-Lecture-Perspectives in Understanding Robots-images-$index.png"
+            target=".site-docs/slides/robot-perspectives/images/Keynote-Week01-1-Lecture-Perspectives in Understanding Robots-images-$index.png"
             test -f "$rendered"
             cp "$rendered" "$target"
           done
+
+      - name: Build course site
+        run: |
+          mkdocs build --strict
           touch _site/.nojekyll
+
+      - name: Check site links and assets
+        run: python scripts/check_site.py
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v6
